@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "246800579821",
+    "firebase_url": "https://magazyn-smaku-default-rtdb.firebaseio.com",
+    "project_id": "magazyn-smaku",
+    "storage_bucket": "magazyn-smaku.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246800579821:android:d520da09887513b03fa0e4",
+        "android_client_info": {
+          "package_name": "com.example.magazynsmaku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA81Ouw7x5F016ZvifktKy152q-ySmVEMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246800579821:android:b34e1355d82791193fa0e4",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA81Ouw7x5F016ZvifktKy152q-ySmVEMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
