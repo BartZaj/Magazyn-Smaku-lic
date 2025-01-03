@@ -30,6 +30,7 @@
             android:name=".SignUpActivity"
             android:exported="true"
             android:theme="@style/Theme.MyApplication" />
+        <activity android:name=".ProduktDetailsActivity" />
     </application>
 
 </manifest>
