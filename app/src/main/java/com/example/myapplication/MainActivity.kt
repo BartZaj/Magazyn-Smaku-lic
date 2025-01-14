@@ -59,6 +59,13 @@ class MainActivity : AppCompatActivity() {
         dodajProduktButton.setOnClickListener {
             pokazDialogDodawania(firebaseBaza)
         }
+
+        // Obsługa przycisku dodawania przepisu
+        val dodajPrzepisButton: Button = findViewById(R.id.dodajPrzepisButton)
+        dodajPrzepisButton.setOnClickListener {
+            val intent = Intent(this, DodajPrzepisActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun pokazDialogDodawania(firebaseBaza: DatabaseReference) {

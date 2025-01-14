@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Pole na nazwę przepisu -->
+    <EditText
+        android:id="@+id/nazwaPrzepisuEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nazwa przepisu"
+        android:inputType="text" />
+
+    <!-- Pole na treść przepisu -->
+    <EditText
+        android:id="@+id/trescPrzepisuEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Treść przepisu"
+        android:inputType="textMultiLine"
+        android:gravity="top"
+        android:lines="4" />
+
+    <!-- ScrollView, który zawiera produkty -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/produktyLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <!-- Przyciski dodawania i anulowania -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/anulujButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Anuluj" />
+
+        <Button
+            android:id="@+id/dodajPrzepisButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dodaj"
+            android:layout_marginStart="16dp" />
+
+    </LinearLayout>
+</LinearLayout>
