@@ -66,6 +66,12 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, DodajPrzepisActivity::class.java)
             startActivity(intent)
         }
+
+        val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
+        zobaczPrzepisyButton.setOnClickListener {
+            val intent = Intent(this, ListaPrzepisowActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun pokazDialogDodawania(firebaseBaza: DatabaseReference) {

@@ -20,7 +20,7 @@ class ProduktDetailsActivity : AppCompatActivity() {
 
     private lateinit var databaseRef: DatabaseReference
     private lateinit var partieAdapter: PartieAdapter
-    private var partieList = mutableListOf<Pair<String, Int>>() // Lista partii (ID, waga)
+    private var partieList = mutableListOf<Pair<String, Pair<Int, String>>>() // Lista partii (ID, (waga, dataWaznosci))
     private var totalWeight = 0
 
     private var idProduktu: String = ""
@@ -49,17 +49,13 @@ class ProduktDetailsActivity : AppCompatActivity() {
         databaseRef = FirebaseDatabase.getInstance().getReference("produkty/$idProduktu")
 
         // Inicjalizacja RecyclerView
-        partieAdapter = PartieAdapter(partieList) { batchId ->
-            deleteBatch(batchId)
-        }
+        partieAdapter = PartieAdapter(partieList) { batchId -> deleteBatch(batchId) }
         batchesRecyclerView.layoutManager = LinearLayoutManager(this)
         batchesRecyclerView.adapter = partieAdapter
 
         loadBatches()
 
-        addBatchButton.setOnClickListener {
-            showAddBatchDialog()
-        }
+        addBatchButton.setOnClickListener { showAddBatchDialog() }
     }
 
     private fun loadBatches() {
@@ -71,7 +67,8 @@ class ProduktDetailsActivity : AppCompatActivity() {
                 for (batchSnapshot in snapshot.children) {
                     val batchId = batchSnapshot.key ?: continue
                     val weight = batchSnapshot.child("waga").getValue(Int::class.java) ?: 0
-                    partieList.add(batchId to weight)
+                    val expiryDate = batchSnapshot.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
+                    partieList.add(batchId to Pair(weight, expiryDate))
                     totalWeight += weight
                 }
 
@@ -88,15 +85,20 @@ class ProduktDetailsActivity : AppCompatActivity() {
     private fun showAddBatchDialog() {
         val dialogBuilder = AlertDialog.Builder(this)
         dialogBuilder.setTitle("Dodaj partię")
-        val input = android.widget.EditText(this)
-        input.hint = "Waga (w gramach)"
-        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
-        dialogBuilder.setView(input)
+
+        // Layout dla dialogu
+        val dialogLayout = layoutInflater.inflate(R.layout.dialog_add_batch, null)
+        val weightInput = dialogLayout.findViewById<android.widget.EditText>(R.id.weightEditText)
+        val datePicker = dialogLayout.findViewById<android.widget.DatePicker>(R.id.datePicker)
+
+        dialogBuilder.setView(dialogLayout)
 
         dialogBuilder.setPositiveButton("Dodaj") { _, _ ->
-            val weight = input.text.toString().toIntOrNull()
+            val weight = weightInput.text.toString().toIntOrNull()
+            val selectedDate = "${datePicker.dayOfMonth}-${datePicker.month + 1}-${datePicker.year}"
+
             if (weight != null && weight > 0) {
-                addNewBatch(weight)
+                addNewBatch(weight, selectedDate)
             } else {
                 Toast.makeText(this, "Podaj poprawną wagę", Toast.LENGTH_SHORT).show()
             }
@@ -107,17 +109,20 @@ class ProduktDetailsActivity : AppCompatActivity() {
         dialogBuilder.show()
     }
 
-    private fun addNewBatch(weight: Int) {
+    private fun addNewBatch(weight: Int, expiryDate: String) {
         val newBatchId = databaseRef.child("partie").push().key
         if (newBatchId != null) {
-            val batchData = mapOf("waga" to weight)
+            val batchData = mapOf(
+                "waga" to weight,
+                "dataWaznosci" to expiryDate
+            )
             databaseRef.child("partie").child(newBatchId).setValue(batchData)
             databaseRef.child("ogolnaIlosc").setValue(totalWeight + weight)
         }
     }
 
     private fun deleteBatch(batchId: String) {
-        val batchWeight = partieList.find { it.first == batchId }?.second ?: return
+        val batchWeight = partieList.find { it.first == batchId }?.second?.first ?: return
         databaseRef.child("partie").child(batchId).removeValue()
         databaseRef.child("ogolnaIlosc").setValue(totalWeight - batchWeight)
     }
