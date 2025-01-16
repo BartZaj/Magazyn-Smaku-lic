@@ -8,7 +8,7 @@
 
     <!-- Nazwa produktu -->
     <TextView
-        android:id="@+id/nazwaProduktuTextView"
+        android:id="@+id/nazwaTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Nazwa produktu"
@@ -16,11 +16,20 @@
         android:textStyle="bold"
         android:layout_marginBottom="4dp" />
 
-    <!-- Ilość w przepisie i ogólna ilość -->
+    <!-- Ilość w przepisie -->
     <TextView
-        android:id="@+id/iloscProduktuTextView"
+        android:id="@+id/iloscTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ilość: 0 / 0"
+        android:text="Ilość w przepisie: 0"
+        android:textSize="14sp"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Ilość ogólna dostępna -->
+    <TextView
+        android:id="@+id/iloscOgolnaTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dostępna ilość: 0"
         android:textSize="14sp" />
 </LinearLayout>
