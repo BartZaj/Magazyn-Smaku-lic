@@ -32,6 +32,9 @@
             android:theme="@style/Theme.MyApplication" />
         <activity android:name=".ProduktDetailsActivity" />
         <activity android:name=".DodajPrzepisActivity" />
+        <activity android:name=".ListaPrzepisowActivity" />
+        <activity android:name=".SzczegolyPrzepisuActivity" />
+        <activity android:name=".ProductsActivity" />
     </application>
 
 </manifest>

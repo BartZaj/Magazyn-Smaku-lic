@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Nazwa produktu -->
+    <TextView
+        android:id="@+id/nazwaTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nazwa produktu"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Ilość w przepisie -->
+    <TextView
+        android:id="@+id/iloscTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ilość w przepisie: 0"
+        android:textSize="14sp"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Ilość ogólna dostępna -->
+    <TextView
+        android:id="@+id/iloscOgolnaTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dostępna ilość: 0"
+        android:textSize="14sp" />
+</LinearLayout>

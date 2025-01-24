@@ -1,31 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Przycisk dodawania kategorii -->
     <Button
-        android:id="@+id/dodajKategorieButton"
+        android:id="@+id/dodajProduktButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Dodaj kategorię"
+        android:text="Dodaj Produkt"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp" />
 
-
-    <!-- Przycisk wyświetlania przepisów -->
-    <Button
-        android:id="@+id/zobaczPrzepisyButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Zobacz Przepisy"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp" />
-
-    <!-- RecyclerView dla kategorii -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/kategorieRecyclerView"
+        android:id="@+id/produktyRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

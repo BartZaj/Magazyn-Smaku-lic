@@ -13,6 +13,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.FirebaseAuth
+
+data class ProduktWybrany(
+    val id: String,
+    val name: String,
+    var ilosc: Int,
+    val id_kategorii: String
+)
 
 class DodajPrzepisActivity : AppCompatActivity() {
 
@@ -24,52 +32,62 @@ class DodajPrzepisActivity : AppCompatActivity() {
 
     private lateinit var firebaseRef: DatabaseReference
 
-    // Zmieniamy mapę, aby przechowywać nazwy produktów i ich gramatury
-    private val wybraneProdukty = mutableMapOf<String, Int>()
+    private val wybraneProdukty = mutableListOf<ProduktWybrany>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dodaj_przepis)
 
-        // Inicjalizacja widoków
         nazwaPrzepisuEditText = findViewById(R.id.nazwaPrzepisuEditText)
         trescPrzepisuEditText = findViewById(R.id.trescPrzepisuEditText)
         produktyLinearLayout = findViewById(R.id.produktyLinearLayout)
         dodajButton = findViewById(R.id.dodajPrzepisButton)
         anulujButton = findViewById(R.id.anulujButton)
 
-        // Inicjalizacja bazy danych Firebase
         firebaseRef = FirebaseDatabase.getInstance().getReference("przepisy")
 
-        // Ładowanie produktów z Firebase
-        loadProduktyFromFirebase()
+        loadCategoryFromFirebase()
 
-        // Ustawienie kliknięcia przycisku "Dodaj"
         dodajButton.setOnClickListener {
             dodajPrzepisDoFirebase()
         }
 
-        // Ustawienie kliknięcia przycisku "Anuluj"
         anulujButton.setOnClickListener {
             finish()
         }
     }
 
-    // Funkcja ładująca produkty z Firebase
-    private fun loadProduktyFromFirebase() {
-        FirebaseDatabase.getInstance().getReference("produkty")
+    private fun loadCategoryFromFirebase() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val uid = currentUser?.uid
+
+        if (uid != null) {
+            FirebaseDatabase.getInstance().getReference("users/$uid/kategorie")
+                .get().addOnSuccessListener { snapshot ->
+                    for (categorySnapshot in snapshot.children) {
+                        val idKategorii = categorySnapshot.key ?: continue
+                        loadProduktyForCategory(uid, idKategorii)
+                    }
+                }
+        } else {
+            Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun loadProduktyForCategory(uid: String, idKategorii: String) {
+        FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty")
             .get().addOnSuccessListener { snapshot ->
                 for (child in snapshot.children) {
                     val id = child.key ?: continue
-                    val nazwa = child.child("nazwa").getValue(String::class.java) ?: "Nieznany"
-                    val productView = createProductView(id, nazwa)
+                    val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
+                    val idKategoria = idKategorii
+                    val productView = createProductView(id, nazwa, idKategoria)
                     produktyLinearLayout.addView(productView)
                 }
             }
     }
 
-    // Funkcja tworząca widok dla każdego produktu
-    private fun createProductView(id: String, nazwa: String): View {
+    private fun createProductView(id: String, nazwa: String, idKategorii: String): View {
         val productView = LayoutInflater.from(this).inflate(R.layout.item_produkt_do_wyboru, null)
 
         val checkBox: CheckBox = productView.findViewById(R.id.produktCheckBox)
@@ -78,73 +96,79 @@ class DodajPrzepisActivity : AppCompatActivity() {
 
         nazwaTextView.text = nazwa
 
-        // Początkowo ustawiamy gramaturę na zablokowaną, aby nie było możliwe jej edytowanie przed zaznaczeniem checkboxa
         gramaturaEditText.isEnabled = false
 
-        // Ustawiamy domyślną gramaturę na podstawie wcześniej zapisanej wartości
-        gramaturaEditText.setText(wybraneProdukty[nazwa]?.toString())
-
-        // Obsługa zmiany stanu checkboxa
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Jeśli checkbox jest zaznaczony, umożliwiamy edycję gramatury
                 gramaturaEditText.isEnabled = true
-
-                // Jeśli gramatura była już zapisana, przypisujemy ją do pola
-                val gramatura = wybraneProdukty[nazwa] ?: 0
-                gramaturaEditText.setText(gramatura.toString())
+                val gramatura = gramaturaEditText.text.toString().toIntOrNull() ?: 0
+                if (gramatura > 0) {
+                    val produkt = ProduktWybrany(id, nazwa, gramatura, idKategorii)
+                    wybraneProdukty.add(produkt)
+                }
             } else {
-                // Jeśli checkbox nie jest zaznaczony, blokujemy edycję gramatury
                 gramaturaEditText.isEnabled = false
-                gramaturaEditText.setText("") // Możemy wyczyścić gramaturę, jeśli checkbox jest odznaczony
-                wybraneProdukty.remove(nazwa) // Usuwamy produkt z listy wybranych produktów
+                gramaturaEditText.setText("")
+                wybraneProdukty.removeAll { it.name == nazwa }
             }
         }
 
-        // Obsługa zmiany gramatury
         gramaturaEditText.addTextChangedListener {
             val gramatura = it.toString().toIntOrNull() ?: 0
-            if (gramatura > 0) {
-                // Jeśli gramatura jest większa niż 0, przechowujemy ją w mapie
-                wybraneProdukty[nazwa] = gramatura
-            } else {
-                // Jeśli gramatura wynosi 0, usuwamy produkt z mapy
-                wybraneProdukty.remove(nazwa)
+            if (checkBox.isChecked) {
+                val produkt = wybraneProdukty.find { it.name == nazwa }
+                if (produkt != null) {
+                    produkt.ilosc = gramatura
+                } else if (gramatura > 0) {
+                    wybraneProdukty.add(ProduktWybrany(id, nazwa, gramatura, idKategorii))
+                }
             }
         }
 
         return productView
     }
 
-    // Funkcja dodająca przepis do Firebase
     private fun dodajPrzepisDoFirebase() {
         val nazwaPrzepisu = nazwaPrzepisuEditText.text.toString().trim()
         val trescPrzepisu = trescPrzepisuEditText.text.toString().trim()
 
-        // Walidacja pól formularza
         if (nazwaPrzepisu.isEmpty() || trescPrzepisu.isEmpty()) {
             Toast.makeText(this, "Uzupełnij wszystkie pola", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val przepisId = firebaseRef.push().key
-        if (przepisId != null) {
-            // Tworzenie mapy danych przepisu
-            val przepisData = mapOf(
-                "nazwa" to nazwaPrzepisu,
-                "tresc" to trescPrzepisu,
-                "produkty" to wybraneProdukty // Zamiast id, przekazujemy nazwy produktów
-            )
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val uid = currentUser?.uid
 
-            // Zapis do Firebase
-            firebaseRef.child(przepisId).setValue(przepisData).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(this, "Przepis dodany pomyślnie!", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Toast.makeText(this, "Błąd podczas dodawania przepisu.", Toast.LENGTH_SHORT).show()
+        if (uid != null) {
+            val przepisId = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy").push().key
+            if (przepisId != null) {
+                val produktyMap = wybraneProdukty.associate { produkt ->
+                    produkt.id to mapOf(
+                        "name" to produkt.name,
+                        "ilosc" to produkt.ilosc,
+                        "id_kategorii" to produkt.id_kategorii
+                    )
                 }
+
+                val przepisData = mapOf(
+                    "nazwa" to nazwaPrzepisu,
+                    "tresc" to trescPrzepisu,
+                    "produkty" to produktyMap
+                )
+
+                FirebaseDatabase.getInstance().getReference("users/$uid/przepisy/$przepisId")
+                    .setValue(przepisData).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(this, "Przepis dodany pomyślnie!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        } else {
+                            Toast.makeText(this, "Błąd podczas dodawania przepisu.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
+        } else {
+            Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
         }
     }
 }

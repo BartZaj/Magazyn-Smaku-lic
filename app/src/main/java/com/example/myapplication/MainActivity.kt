@@ -9,86 +9,89 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var produktyRecyclerView: RecyclerView
-    private lateinit var produktyAdapter: ProduktyAdapter
-    private val listaProduktow = mutableListOf<Pair<String, String>>() // Lista: ID produktu, Nazwa produktu
+    private lateinit var kategorieRecyclerView: RecyclerView
+    private lateinit var kategorieAdapter: KategorieAdapter
+    private val listaKategorii = mutableListOf<Pair<String, String>>() // Lista: ID kategorii, Nazwa kategorii
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicjalizacja RecyclerView
-        produktyRecyclerView = findViewById(R.id.produktyRecyclerView)
-        produktyRecyclerView.layoutManager = LinearLayoutManager(this)
-        produktyAdapter = ProduktyAdapter(listaProduktow) { idProduktu, nazwaProduktu ->
-            val intent = Intent(this, ProduktDetailsActivity::class.java)
-            intent.putExtra("idProduktu", idProduktu) // Przekazuje ID produktu
-            intent.putExtra("nazwaProduktu", nazwaProduktu) // Przekazuje nazwe produktu
+        val user = FirebaseAuth.getInstance().currentUser
+        val uid = user?.uid
+
+        if (uid == null) {
+            Toast.makeText(this, "Użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        kategorieRecyclerView = findViewById(R.id.kategorieRecyclerView)
+        kategorieRecyclerView.layoutManager = LinearLayoutManager(this)
+        kategorieAdapter = KategorieAdapter(listaKategorii) { idKategorii, nazwaKategorii ->
+            val intent = Intent(this, ProductsActivity::class.java)
+            intent.putExtra("idKategorii", idKategorii) // Przekazujemy ID kategorii
+            intent.putExtra("nazwaKategorii", nazwaKategorii)
             startActivity(intent)
         }
-        produktyRecyclerView.adapter = produktyAdapter
+        kategorieRecyclerView.adapter = kategorieAdapter
 
-        val firebaseBaza = FirebaseDatabase.getInstance().getReference("produkty")
+        val firebaseBaza = FirebaseDatabase.getInstance().getReference("users/$uid/kategorie")
 
-        // Pobieranie listy produktow z Firebase
         firebaseBaza.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                listaProduktow.clear()
-                for (produktSnapshot in snapshot.children) {
-                    val idProduktu = produktSnapshot.key ?: continue
-                    val nazwaProduktu = produktSnapshot.child("nazwa").getValue(String::class.java) ?: "Nieznany"
-                    listaProduktow.add(idProduktu to nazwaProduktu)
+                listaKategorii.clear()
+                for (kategoriaSnapshot in snapshot.children) {
+                    val idKategorii = kategoriaSnapshot.key ?: continue
+                    val nazwaKategorii = kategoriaSnapshot.child("name").getValue(String::class.java) ?: "Nieznana"
+                    listaKategorii.add(idKategorii to nazwaKategorii)
                 }
-                produktyAdapter.notifyDataSetChanged()
+                kategorieAdapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Błąd podczas pobierania produktów: ${error.message}")
+                Log.e("Firebase", "Błąd podczas pobierania kategorii: ${error.message}")
             }
         })
 
-        val dodajProduktButton: Button = findViewById(R.id.dodajProduktButton)
-        dodajProduktButton.setOnClickListener {
-            pokazDialogDodawania(firebaseBaza)
+        val dodajKategorieButton: Button = findViewById(R.id.dodajKategorieButton)
+        dodajKategorieButton.setOnClickListener {
+            pokazDialogDodawaniaKategorii(firebaseBaza)
         }
 
-        // Obsługa przycisku dodawania przepisu
-        val dodajPrzepisButton: Button = findViewById(R.id.dodajPrzepisButton)
-        dodajPrzepisButton.setOnClickListener {
-            val intent = Intent(this, DodajPrzepisActivity::class.java)
+        val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
+        zobaczPrzepisyButton.setOnClickListener {
+            val intent = Intent(this, ListaPrzepisowActivity::class.java)
             startActivity(intent)
         }
     }
 
-    private fun pokazDialogDodawania(firebaseBaza: DatabaseReference) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_dodaj_produkt, null)
-        val editTextNazwa = dialogView.findViewById<EditText>(R.id.editTextNazwaProduktu)
+    private fun pokazDialogDodawaniaKategorii(firebaseBaza: DatabaseReference) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_dodaj_kategorie, null)
+        val editTextNazwa = dialogView.findViewById<EditText>(R.id.editTextNazwaKategorii)
 
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Dodaj produkt")
+            .setTitle("Dodaj kategorię")
             .setView(dialogView)
             .setPositiveButton("Dodaj") { _, _ ->
-                val nazwaProduktu = editTextNazwa.text.toString().trim()
-                if (nazwaProduktu.isNotEmpty()) {
-                    val nowyProduktRef = firebaseBaza.push()
-                    nowyProduktRef.setValue(mapOf("nazwa" to nazwaProduktu))
+                val nazwaKategorii = editTextNazwa.text.toString().trim()
+                if (nazwaKategorii.isNotEmpty()) {
+                    val nowaKategoriaRef = firebaseBaza.push()
+                    nowaKategoriaRef.setValue(mapOf("name" to nazwaKategorii))
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                Toast.makeText(this, "Produkt dodany pomyślnie!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Kategoria dodana pomyślnie!", Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(this, "Błąd podczas dodawania produktu.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Błąd podczas dodawania kategorii.", Toast.LENGTH_SHORT).show()
                             }
                         }
                 } else {
-                    Toast.makeText(this, "Nazwa produktu nie może być pusta.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Nazwa kategorii nie może być pusta.", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Anuluj", null)

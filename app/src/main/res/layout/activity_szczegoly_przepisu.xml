@@ -1,0 +1,57 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/nazwaPrzepisuTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nazwa przepisu"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/trescPrzepisuTextView"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:paddingBottom="16dp"
+        android:text="Treść przepisu"
+        android:textSize="16sp" />
+
+    <!-- Nowy widok do zmiany ilości posiłków -->
+    <TextView
+        android:id="@+id/iloscPosilkowLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ilość posiłków:"
+        android:textSize="18sp"
+        android:paddingBottom="8dp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/iloscPosilkowEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text="1"
+        android:padding="8dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lista produktów:"
+        android:textSize="18sp"
+        android:paddingBottom="8dp"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/produktyRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical" />
+</LinearLayout>

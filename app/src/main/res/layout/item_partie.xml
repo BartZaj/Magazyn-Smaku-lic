@@ -1,21 +1,41 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="8dp">
 
+    <!-- Tekst: Partia -->
     <TextView
         android:id="@+id/batchWeightTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="Partia: 0 g"
-        android:textSize="16sp" />
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/deleteBatchButton"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Tekst: Data ważności -->
+    <TextView
+        android:id="@+id/batchExpiryDateTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Data ważności: Brak daty"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/deleteBatchButton"
+        app:layout_constraintTop_toBottomOf="@id/batchWeightTextView"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Przycisk Usuń -->
     <Button
         android:id="@+id/deleteBatchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Usuń" />
-</LinearLayout>
+        android:text="Usuń"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
