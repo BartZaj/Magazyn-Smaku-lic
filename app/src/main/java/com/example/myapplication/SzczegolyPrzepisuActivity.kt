@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class SzczegolyPrzepisuActivity : AppCompatActivity() {
@@ -21,36 +23,46 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
     private lateinit var firebaseRef: DatabaseReference
     private lateinit var produktyAdapter: ProduktyPrzepisuAdapter
 
-    // Lista produktów przechowywana jako lista map
     private val produktyList = mutableListOf<Map<String, Any>>()
-
-    private var iloscPosilkow: Int = 1 // Początkowa wartość ilości posiłków (domyślnie 1)
+    private var iloscPosilkow: Int = 1
+    private var uid: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_szczegoly_przepisu)
 
-        // Inicjalizacja widoków
         nazwaPrzepisuTextView = findViewById(R.id.nazwaPrzepisuTextView)
         trescPrzepisuTextView = findViewById(R.id.trescPrzepisuTextView)
         produktyRecyclerView = findViewById(R.id.produktyRecyclerView)
-        iloscPosilkowEditText = findViewById(R.id.iloscPosilkowEditText) // Inicjalizacja pola do ilości posiłków
+        iloscPosilkowEditText = findViewById(R.id.iloscPosilkowEditText)
 
-        // Ustawienie adaptera RecyclerView
-        produktyAdapter = ProduktyPrzepisuAdapter(produktyList)
+        produktyAdapter = ProduktyPrzepisuAdapter(produktyList) { idProduktu, idKategorii ->
+            val intent = Intent(this, ProduktDetailsActivity::class.java).apply {
+                putExtra("uid", uid)
+                putExtra("idProduktu", idProduktu)
+                putExtra("idKategorii", idKategorii)
+                putExtra("nazwaProduktu", produktyList.find { it["id"] == idProduktu }?.get("nazwa").toString())
+            }
+            startActivity(intent)
+        }
+
         produktyRecyclerView.layoutManager = LinearLayoutManager(this)
         produktyRecyclerView.adapter = produktyAdapter
 
-        // Pobranie ID przepisu z intencji
+        uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            Toast.makeText(this, "Brak zalogowanego użytkownika", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val przepisId = intent.getStringExtra("przepisId") ?: return
-        firebaseRef = FirebaseDatabase.getInstance().getReference("przepisy/$przepisId")
+        firebaseRef = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy/$przepisId")
 
-        loadSzczegolyPrzepisu() // Załaduj szczegóły przepisu
+        loadSzczegolyPrzepisu()
 
-        // Obserwacja zmiany ilości posiłków
         iloscPosilkowEditText.addTextChangedListener { editable ->
             val iloscPosilkow = editable.toString().toIntOrNull() ?: 1
-            przeliczProdukty(iloscPosilkow) // Przelicz ilości produktów
+            przeliczProdukty(iloscPosilkow)
         }
     }
 
@@ -68,22 +80,23 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
                 val id = produkt.key ?: return@forEach
                 val nazwaProduktu = produkt.child("name").getValue(String::class.java) ?: "Nieznany"
                 val iloscPrzepis = produkt.child("ilosc").getValue(Int::class.java) ?: 0
+                val idKategorii = produkt.child("id_kategorii").getValue(String::class.java) ?: "Nieznany"
 
-                // Pobieranie ogólnej ilości produktu z bazy
-                FirebaseDatabase.getInstance().getReference("produkty/$id/ogolnaIlosc")
+                FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$id/ogolnaIlosc")
                     .get().addOnSuccessListener { ogolnaIloscSnapshot ->
                         val iloscOgolna = ogolnaIloscSnapshot.getValue(Int::class.java) ?: 0
 
-                        // Dodanie produktu do listy z zachowaniem bazowej ilości
                         val produktMap = mutableMapOf(
                             "nazwa" to nazwaProduktu,
-                            "iloscPrzepis" to iloscPrzepis, // Aktualna ilość w przepisie
-                            "iloscPrzepisBazowa" to iloscPrzepis, // Bazowa ilość
-                            "iloscOgolna" to iloscOgolna
+                            "iloscPrzepis" to iloscPrzepis,
+                            "iloscPrzepisBazowa" to iloscPrzepis,
+                            "iloscOgolna" to iloscOgolna,
+                            "id" to id,
+                            "idKategorii" to idKategorii
                         )
 
                         produktyList.add(produktMap)
-                        produktyAdapter.notifyDataSetChanged() // Odświeżenie adaptera
+                        produktyAdapter.notifyDataSetChanged()
                     }
             }
         }.addOnFailureListener {
@@ -92,25 +105,43 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
         }
     }
 
-    // Funkcja przeliczająca ilość produktów na podstawie ilości posiłków
     private fun przeliczProdukty(iloscPosilkow: Int) {
-        // Zmieniamy ilości produktów w zależności od wartości wprowadzonej w polu
         produktyList.forEach { produkt ->
-            val iloscPrzepisBazowa = produkt["iloscPrzepisBazowa"] as? Int ?: 0 // Bazowa ilość z bazy
-            val iloscPoZmianie = iloscPrzepisBazowa * iloscPosilkow // Mnożymy przez ilość posiłków
-
-            // Tworzymy kopię mapy, aby móc ją zmodyfikować
+            val iloscPrzepisBazowa = produkt["iloscPrzepisBazowa"] as? Int ?: 0
+            val iloscPoZmianie = iloscPrzepisBazowa * iloscPosilkow
             val updatedProdukt = produkt.toMutableMap()
-
-            // Zaktualizowanie ilości w przepisie
             updatedProdukt["iloscPrzepis"] = iloscPoZmianie
-
-            // Zaktualizowanie oryginalnej mapy w liście
             val index = produktyList.indexOf(produkt)
             produktyList[index] = updatedProdukt
         }
 
-        // Powiadamiamy adapter o zmianie danych, aby odświeżyć widok
         produktyAdapter.notifyDataSetChanged()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        reaload()
+    }
+
+    private fun reaload() {
+
+        // Zaktualizuj ogólną ilość produktu dla wszystkich produktów w przepisie
+        produktyList.forEach { produkt ->
+            val idKategorii = produkt["idKategorii"] as? String ?: return@forEach
+            val idProduktu = produkt["id"] as? String ?: return@forEach
+
+            FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$idProduktu/ogolnaIlosc")
+                .get().addOnSuccessListener { ogolnaIloscSnapshot ->
+                    val ogolnaIlosc = ogolnaIloscSnapshot.getValue(Int::class.java) ?: 0
+
+                    val updatedProdukt = produkt.toMutableMap()
+                    updatedProdukt["iloscOgolna"] = ogolnaIlosc
+
+                    val index = produktyList.indexOf(produkt)
+                    produktyList[index] = updatedProdukt
+
+                    produktyAdapter.notifyDataSetChanged()
+                }
+        }
     }
 }

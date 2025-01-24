@@ -1,0 +1,20 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:elevation="4dp"
+    android:layout_marginBottom="8dp"> <!-- Zmieniono marginBottom na layout_marginBottom -->
+
+    <!-- Tekst wyświetlający nazwę kategorii -->
+    <TextView
+        android:id="@+id/nazwaKategoriiTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:padding="8dp"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
+</LinearLayout>

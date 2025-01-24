@@ -3,11 +3,13 @@ package com.example.myapplication
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
+import com.google.firebase.auth.FirebaseAuth
 
 class ListaPrzepisowActivity : AppCompatActivity() {
 
@@ -29,11 +31,24 @@ class ListaPrzepisowActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val dodajPrzepisButton: Button = findViewById(R.id.dodajPrzepisButton)
+        dodajPrzepisButton.setOnClickListener {
+            val intent = Intent(this, DodajPrzepisActivity::class.java)
+            startActivity(intent)
+        }
+
         przepisyRecyclerView.layoutManager = LinearLayoutManager(this)
         przepisyRecyclerView.adapter = przepisyAdapter
 
-        firebaseRef = FirebaseDatabase.getInstance().getReference("przepisy")
-        loadPrzepisy()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val uid = currentUser?.uid
+
+        if (uid != null) {
+            firebaseRef = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy")
+            loadPrzepisy()
+        } else {
+            Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadPrzepisy() {

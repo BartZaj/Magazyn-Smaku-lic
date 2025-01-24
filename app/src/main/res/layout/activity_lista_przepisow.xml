@@ -16,6 +16,14 @@
         android:layout_gravity="center"
         android:paddingBottom="16dp"/>
 
+    <Button
+        android:id="@+id/dodajPrzepisButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dodaj Przepis"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/przepisyRecyclerView"
         android:layout_width="match_parent"
