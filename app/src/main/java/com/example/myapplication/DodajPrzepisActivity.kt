@@ -46,7 +46,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
 
         firebaseRef = FirebaseDatabase.getInstance().getReference("przepisy")
 
-        loadCategoryFromFirebase()
+        loadProductsFromFirebase()
 
         dodajButton.setOnClickListener {
             dodajPrzepisDoFirebase()
@@ -57,34 +57,36 @@ class DodajPrzepisActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadCategoryFromFirebase() {
+    private fun loadProductsFromFirebase() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val uid = currentUser?.uid
 
         if (uid != null) {
             FirebaseDatabase.getInstance().getReference("users/$uid/kategorie")
                 .get().addOnSuccessListener { snapshot ->
+                    val allProducts = mutableListOf<Triple<String, String, String>>() // Lista do przechowywania ID, nazwy i ID kategorii
+
                     for (categorySnapshot in snapshot.children) {
                         val idKategorii = categorySnapshot.key ?: continue
-                        loadProduktyForCategory(uid, idKategorii)
+                        val produktySnapshot = categorySnapshot.child("produkty")
+                        for (child in produktySnapshot.children) {
+                            val id = child.key ?: continue
+                            val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
+                            allProducts.add(Triple(id, nazwa, idKategorii)) // Dodajemy (ID, nazwa, ID kategorii)
+                        }
+                    }
+
+                    allProducts.sortBy { it.second }
+
+                    produktyLinearLayout.removeAllViews()
+                    for ((id, nazwa, idKategorii) in allProducts) {
+                        val productView = createProductView(id, nazwa, idKategorii)
+                        produktyLinearLayout.addView(productView)
                     }
                 }
         } else {
             Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun loadProduktyForCategory(uid: String, idKategorii: String) {
-        FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty")
-            .get().addOnSuccessListener { snapshot ->
-                for (child in snapshot.children) {
-                    val id = child.key ?: continue
-                    val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
-                    val idKategoria = idKategorii
-                    val productView = createProductView(id, nazwa, idKategoria)
-                    produktyLinearLayout.addView(productView)
-                }
-            }
     }
 
     private fun createProductView(id: String, nazwa: String, idKategorii: String): View {

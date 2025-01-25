@@ -13,7 +13,7 @@
         android:text="Partia: 0 g"
         android:layout_marginEnd="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/deleteBatchButton"
+        app:layout_constraintEnd_toStartOf="@id/editBatchButton"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Tekst: Data ważności -->
@@ -24,9 +24,19 @@
         android:text="Data ważności: Brak daty"
         android:layout_marginEnd="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/deleteBatchButton"
+        app:layout_constraintEnd_toStartOf="@id/editBatchButton"
         app:layout_constraintTop_toBottomOf="@id/batchWeightTextView"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
+        android:id="@+id/editBatchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edytuj"
+        app:layout_constraintEnd_toStartOf="@id/deleteBatchButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="8dp" />
 
     <!-- Przycisk Usuń -->
     <Button

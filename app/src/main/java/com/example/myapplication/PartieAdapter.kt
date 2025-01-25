@@ -8,14 +8,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class PartieAdapter(
-    private val partieList: List<Pair<String, Pair<Int, String>>>, // Lista partii (ID, (waga, dataWaznosci))
-    private val onDeleteClick: (String) -> Unit
+    private val partieList: MutableList<Pair<String, Pair<Int, String>>>, // Lista partii (ID, (waga, dataWaznosci))
+    private val onDeleteClick: (String) -> Unit,
+    private val onEditClick: (String, Int) -> Unit
 ) : RecyclerView.Adapter<PartieAdapter.PartieViewHolder>() {
 
     class PartieViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val batchWeightTextView: TextView = view.findViewById(R.id.batchWeightTextView)
         val batchExpiryDateTextView: TextView = view.findViewById(R.id.batchExpiryDateTextView)
         val deleteButton: Button = view.findViewById(R.id.deleteBatchButton)
+        val editButton: Button = view.findViewById(R.id.editBatchButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PartieViewHolder {
@@ -29,8 +31,13 @@ class PartieAdapter(
         val (weight, expiryDate) = data
         holder.batchWeightTextView.text = "Partia: $weight g"
         holder.batchExpiryDateTextView.text = "Data ważności: $expiryDate"
+
         holder.deleteButton.setOnClickListener {
             onDeleteClick(batchId)
+        }
+
+        holder.editButton.setOnClickListener {
+            onEditClick(batchId, weight)
         }
     }
 

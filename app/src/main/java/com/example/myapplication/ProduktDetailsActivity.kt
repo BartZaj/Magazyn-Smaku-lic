@@ -52,7 +52,7 @@ class ProduktDetailsActivity : AppCompatActivity() {
         databaseRef =
             FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$idProduktu/partie")
 
-        partieAdapter = PartieAdapter(partieList) { batchId -> deleteBatch(batchId) }
+        partieAdapter = PartieAdapter(partieList, { batchId -> deleteBatch(batchId) }, { batchId, currentWeight -> showEditBatchDialog(batchId, currentWeight) })
         batchesRecyclerView.layoutManager = LinearLayoutManager(this)
         batchesRecyclerView.adapter = partieAdapter
 
@@ -131,6 +131,39 @@ class ProduktDetailsActivity : AppCompatActivity() {
         databaseRef.child(batchId).removeValue()
 
         updateTotalWeightInDatabase(totalWeight - batchWeight)
+    }
+
+    private fun showEditBatchDialog(batchId: String, currentWeight: Int) {
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder.setTitle("Edytuj partię")
+
+        val dialogLayout = layoutInflater.inflate(R.layout.dialog_edit_batch, null)
+        val weightInput = dialogLayout.findViewById<android.widget.EditText>(R.id.weightEditText)
+
+        dialogBuilder.setView(dialogLayout)
+
+        dialogBuilder.setPositiveButton("Zaktualizuj") { _, _ ->
+            val weightToSubtract = weightInput.text.toString().toIntOrNull()
+            if (weightToSubtract != null && weightToSubtract > 0) {
+                updateBatchWeight(batchId, currentWeight, weightToSubtract)
+            } else {
+                Toast.makeText(this, "Podaj poprawną wagę do odjęcia", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialogBuilder.setNegativeButton("Anuluj") { dialog, _ -> dialog.dismiss() }
+
+        dialogBuilder.show()
+    }
+
+    private fun updateBatchWeight(batchId: String, currentWeight: Int, weightToSubtract: Int) {
+        val newWeight = currentWeight - weightToSubtract
+        if (newWeight >= 0) {
+            databaseRef.child(batchId).child("waga").setValue(newWeight)
+            updateTotalWeightInDatabase(totalWeight - weightToSubtract)
+        } else {
+            Toast.makeText(this, "Waga nie może być mniejsza niż 0", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun updateTotalWeightInDatabase(newTotalWeight: Int) {
