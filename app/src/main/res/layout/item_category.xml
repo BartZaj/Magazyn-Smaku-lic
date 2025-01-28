@@ -5,7 +5,8 @@
     android:orientation="vertical"
     android:padding="8dp"
     android:elevation="4dp"
-    android:layout_marginBottom="8dp"> <!-- Zmieniono marginBottom na layout_marginBottom -->
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/blue_border"> <!-- Dodano obramowanie -->
 
     <!-- Tekst wyświetlający nazwę kategorii -->
     <TextView
@@ -15,6 +16,6 @@
         android:textSize="18sp"
         android:padding="8dp"
         android:ellipsize="end"
-        android:maxLines="1" />
-
+        android:maxLines="1"
+        android:textColor="@color/blue" /> <!-- Tekst w kolorze ramki -->
 </LinearLayout>

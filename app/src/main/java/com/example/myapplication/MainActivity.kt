@@ -51,6 +51,8 @@ class MainActivity : AppCompatActivity() {
                     val nazwaKategorii = kategoriaSnapshot.child("name").getValue(String::class.java) ?: "Nieznana"
                     listaKategorii.add(idKategorii to nazwaKategorii)
                 }
+                listaKategorii.sortBy { it.second }
+
                 kategorieAdapter.notifyDataSetChanged()
             }
 

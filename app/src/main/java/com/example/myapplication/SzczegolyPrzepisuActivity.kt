@@ -96,6 +96,8 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
                         )
 
                         produktyList.add(produktMap)
+
+                        produktyList.sortBy { it["nazwa"].toString() }
                         produktyAdapter.notifyDataSetChanged()
                     }
             }

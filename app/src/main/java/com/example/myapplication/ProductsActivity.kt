@@ -75,6 +75,8 @@ class ProductsActivity : AppCompatActivity() {
                     val nazwaProduktu = produktSnapshot.child("name").getValue(String::class.java) ?: "Nieznany produkt"
                     listaProduktow.add(idProduktu to nazwaProduktu)
                 }
+                listaProduktow.sortBy { it.second }
+
                 produktyAdapter.notifyDataSetChanged()
             }
 

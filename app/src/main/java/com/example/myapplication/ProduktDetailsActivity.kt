@@ -10,6 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class ProduktDetailsActivity : AppCompatActivity() {
 
@@ -67,12 +71,29 @@ class ProduktDetailsActivity : AppCompatActivity() {
                 partieList.clear()
                 totalWeight = 0
 
+                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                val today = Calendar.getInstance()
+
                 for (batchSnapshot in snapshot.children) {
                     val batchId = batchSnapshot.key ?: continue
                     val weight = batchSnapshot.child("waga").getValue(Int::class.java) ?: 0
                     val expiryDate = batchSnapshot.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
-                    partieList.add(batchId to Pair(weight, expiryDate))
-                    totalWeight += weight
+
+                    try {
+                        val expiryDateCalendar = Calendar.getInstance().apply {
+                            time = dateFormat.parse(expiryDate) ?: Date()
+                        }
+                        val daysDifference = ((expiryDateCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                        if (daysDifference >= 0) {
+                            totalWeight += weight
+                        }
+
+                        partieList.add(batchId to Pair(weight, expiryDate))
+                    } catch (e: Exception) {
+                        Log.e("DateParsing", "Błąd parsowania daty: $expiryDate", e)
+                        partieList.add(batchId to Pair(weight, "Nieprawidłowa data"))
+                    }
                 }
 
                 updateTotalWeightInDatabase(totalWeight)
@@ -99,7 +120,10 @@ class ProduktDetailsActivity : AppCompatActivity() {
 
         dialogBuilder.setPositiveButton("Dodaj") { _, _ ->
             val weight = weightInput.text.toString().toIntOrNull()
-            val selectedDate = "${datePicker.dayOfMonth}-${datePicker.month + 1}-${datePicker.year}"
+            val selectedDay = datePicker.dayOfMonth
+            val selectedMonth = datePicker.month + 1
+            val selectedYear = datePicker.year
+            val selectedDate = String.format("%02d-%02d-%d", selectedDay, selectedMonth, selectedYear)
 
             if (weight != null && weight > 0) {
                 addNewBatch(weight, selectedDate)

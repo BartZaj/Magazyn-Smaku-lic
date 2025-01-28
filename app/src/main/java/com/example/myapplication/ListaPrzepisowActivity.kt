@@ -61,6 +61,8 @@ class ListaPrzepisowActivity : AppCompatActivity() {
                     val przepisMap = mapOf("id" to id, "nazwa" to nazwa)
                     przepisyList.add(przepisMap)
                 }
+                przepisyList.sortBy { it["nazwa"].toString() }
+
                 przepisyAdapter.notifyDataSetChanged()
             }
 
