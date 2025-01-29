@@ -3,8 +3,10 @@ package com.example.myapplication
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -89,15 +91,22 @@ class ProductsActivity : AppCompatActivity() {
     private fun pokazDialogDodawaniaProduktu() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_dodaj_produkt, null)
         val editTextNazwa = dialogView.findViewById<EditText>(R.id.editTextNazwaProduktu)
+        val spinnerJednostka = dialogView.findViewById<Spinner>(R.id.spinnerJednostka)
+
+        val jednostki = listOf("g", "kg", "szt", "l", "ml")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, jednostki)
+        spinnerJednostka.adapter = adapter
 
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Dodaj produkt")
             .setView(dialogView)
             .setPositiveButton("Dodaj") { _, _ ->
                 val nazwaProduktu = editTextNazwa.text.toString().trim()
+                val jednostka = spinnerJednostka.selectedItem.toString()
+
                 if (nazwaProduktu.isNotEmpty()) {
                     val nowyProduktRef = firebaseBaza.push()
-                    nowyProduktRef.setValue(mapOf("name" to nazwaProduktu))
+                    nowyProduktRef.setValue(mapOf("name" to nazwaProduktu, "unit" to jednostka))
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 Toast.makeText(this, "Produkt dodany pomyślnie!", Toast.LENGTH_SHORT).show()

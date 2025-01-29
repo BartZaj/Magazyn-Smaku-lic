@@ -12,6 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class SzczegolyPrzepisuActivity : AppCompatActivity() {
 
@@ -82,23 +86,54 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
                 val iloscPrzepis = produkt.child("ilosc").getValue(Int::class.java) ?: 0
                 val idKategorii = produkt.child("id_kategorii").getValue(String::class.java) ?: "Nieznany"
 
-                FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$id/ogolnaIlosc")
-                    .get().addOnSuccessListener { ogolnaIloscSnapshot ->
-                        val iloscOgolna = ogolnaIloscSnapshot.getValue(Int::class.java) ?: 0
+                FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$id")
+                    .get().addOnSuccessListener { jednostkaSnapshot ->
+                        val jednostka = jednostkaSnapshot.child("unit").getValue(String::class.java) ?: "szt."
 
-                        val produktMap = mutableMapOf(
-                            "nazwa" to nazwaProduktu,
-                            "iloscPrzepis" to iloscPrzepis,
-                            "iloscPrzepisBazowa" to iloscPrzepis,
-                            "iloscOgolna" to iloscOgolna,
-                            "id" to id,
-                            "idKategorii" to idKategorii
-                        )
+                        FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$id/partie")
+                            .get().addOnSuccessListener { partieSnapshot ->
+                                var iloscOgolna = 0
+                                val today = Calendar.getInstance()
+                                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
-                        produktyList.add(produktMap)
+                                partieSnapshot.children.forEach { partia ->
+                                    val iloscPartii = partia.child("waga").getValue(Int::class.java) ?: 0
+                                    val terminWaznosciString = partia.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
 
-                        produktyList.sortBy { it["nazwa"].toString() }
-                        produktyAdapter.notifyDataSetChanged()
+                                    try {
+                                        val terminWaznosciCalendar = Calendar.getInstance().apply {
+                                            time = dateFormat.parse(terminWaznosciString) ?: Date()
+                                        }
+                                        val daysDifference = ((terminWaznosciCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                                        if (daysDifference >= 0) {
+                                            iloscOgolna += iloscPartii
+                                        }
+
+                                    } catch (e: Exception) {
+                                        Log.e("ParseError", "Błąd parsowania daty: ${e.message}")
+                                    }
+                                }
+
+                                val produktMap = mutableMapOf(
+                                    "nazwa" to nazwaProduktu,
+                                    "iloscPrzepis" to iloscPrzepis,
+                                    "iloscPrzepisBazowa" to iloscPrzepis,
+                                    "iloscOgolna" to iloscOgolna,
+                                    "id" to id,
+                                    "idKategorii" to idKategorii,
+                                    "jednostka" to jednostka // Dodajemy jednostkę
+                                )
+
+                                produktyList.add(produktMap)
+
+                                produktyList.sortBy { it["nazwa"].toString() }
+                                produktyAdapter.notifyDataSetChanged()
+                            }.addOnFailureListener {
+                                Log.e("Firebase", "Błąd ładowania partii dla produktu: ${it.message}")
+                            }
+                    }.addOnFailureListener {
+                        Log.e("Firebase", "Błąd ładowania jednostki dla produktu: ${it.message}")
                     }
             }
         }.addOnFailureListener {
@@ -126,23 +161,44 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
     }
 
     private fun reaload() {
-
-        // Zaktualizuj ogólną ilość produktu dla wszystkich produktów w przepisie
         produktyList.forEach { produkt ->
             val idKategorii = produkt["idKategorii"] as? String ?: return@forEach
             val idProduktu = produkt["id"] as? String ?: return@forEach
 
-            FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$idProduktu/ogolnaIlosc")
-                .get().addOnSuccessListener { ogolnaIloscSnapshot ->
-                    val ogolnaIlosc = ogolnaIloscSnapshot.getValue(Int::class.java) ?: 0
+            FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$idProduktu/partie")
+                .get().addOnSuccessListener { partieSnapshot ->
+                    var iloscOgolna = 0
+                    val today = Calendar.getInstance()
+                    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+                    partieSnapshot.children.forEach { partia ->
+                        val iloscPartii = partia.child("waga").getValue(Int::class.java) ?: 0
+                        val terminWaznosciString = partia.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
+
+                        try {
+                            val terminWaznosciCalendar = Calendar.getInstance().apply {
+                                time = dateFormat.parse(terminWaznosciString) ?: Date()
+                            }
+                            val daysDifference = ((terminWaznosciCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                            if (daysDifference >= 0) {
+                                iloscOgolna += iloscPartii
+                            }
+
+                        } catch (e: Exception) {
+                            Log.e("ParseError", "Błąd parsowania daty: ${e.message}")
+                        }
+                    }
 
                     val updatedProdukt = produkt.toMutableMap()
-                    updatedProdukt["iloscOgolna"] = ogolnaIlosc
+                    updatedProdukt["iloscOgolna"] = iloscOgolna
 
                     val index = produktyList.indexOf(produkt)
                     produktyList[index] = updatedProdukt
 
                     produktyAdapter.notifyDataSetChanged()
+                }.addOnFailureListener {
+                    Log.e("Firebase", "Błąd ładowania partii dla produktu: ${it.message}")
                 }
         }
     }

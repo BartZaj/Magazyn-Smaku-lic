@@ -1,19 +1,66 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp">
 
+    <TextView
+        android:id="@+id/NumberLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Numer partii:" />
+
     <EditText
-        android:id="@+id/weightEditText"
+        android:id="@+id/batchNumberEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="odaj Numer partii"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/weightLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ilość:" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Ilosc"
-        android:inputType="number" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/weightEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Podaj ilość"
+            android:inputType="number" />
+
+        <TextView
+            android:id="@+id/weightUnitTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="g"
+            android:paddingStart="8dp"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/expiryDateLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Data ważności:"
+        android:layout_marginTop="8dp"/>
 
     <DatePicker
         android:id="@+id/datePicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:datePickerMode="spinner" />
+
 </LinearLayout>

@@ -8,17 +8,29 @@
     android:layout_marginBottom="8dp"
     android:background="@drawable/blue_border"> <!-- Dodano obramowanie -->
 
-    <!-- Tekst: Partia -->
+    <!-- Numer Partii -->
+    <TextView
+        android:id="@+id/batchNumberTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Numer partii: 123456"
+        android:textColor="@color/blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginBottom="4dp" />
+
+    <!-- Waga Partii -->
     <TextView
         android:id="@+id/batchWeightTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Partia: 0 g"
-        android:layout_marginEnd="8dp"
         android:textColor="@color/blue"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/editBatchButton"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/batchNumberTextView"
+        android:layout_marginBottom="4dp" />
 
     <!-- Tekst: Data ważności -->
     <TextView

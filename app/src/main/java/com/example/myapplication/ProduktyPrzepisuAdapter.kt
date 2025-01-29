@@ -23,6 +23,7 @@ class ProduktyPrzepisuAdapter(
         val nazwa = produkt["nazwa"] as? String ?: "Nieznany"
         val iloscPrzepis = produkt["iloscPrzepis"] as? Int ?: 0
         val iloscOgolna = produkt["iloscOgolna"] as? Int ?: 0
+        val jednostka = produkt["jednostka"] as? String ?: "szt."
         val idProduktu = produkt["id"] as? String ?: ""
         val idKategorii = produkt["idKategorii"] as? String ?: ""
 
@@ -33,8 +34,9 @@ class ProduktyPrzepisuAdapter(
         } else {
             holder.nazwaTextView.setTextColor(Color.BLACK)
         }
-        holder.iloscTextView.text = "Ilość w przepisie: $iloscPrzepis"
-        holder.iloscOgolnaTextView.text = "Dostępna ilość: $iloscOgolna"
+
+        holder.iloscTextView.text = "Ilość w przepisie: $iloscPrzepis $jednostka"
+        holder.iloscOgolnaTextView.text = "Dostępna ilość: $iloscOgolna $jednostka"
 
         holder.itemView.setOnClickListener {
             if (idProduktu.isNotEmpty() && idKategorii.isNotEmpty()) {
