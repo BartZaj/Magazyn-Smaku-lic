@@ -52,6 +52,33 @@ class ProductsActivity : AppCompatActivity() {
             pokazDialogDodawaniaProduktu()
         }
 
+        val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
+        zobaczPrzepisyButton.setOnClickListener {
+            val intent = Intent(this, ListaPrzepisowActivity::class.java)
+            startActivity(intent)
+
+            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            startActivity(intent)
+
+            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
+            finish()
+        }
+
+        val mojMagazynButton: Button = findViewById(R.id.mojMagazynButton)
+        mojMagazynButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+
+            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+
+            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
+            finish()
+        }
+
         produktyAdapter = ProduktyAdapter(listaProduktow) { idProduktu, nazwaProduktu ->
             // Przejście do ProduktDetailsActivity
             val intent = Intent(this, ProduktDetailsActivity::class.java).apply {

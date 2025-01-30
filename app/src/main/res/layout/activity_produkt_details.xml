@@ -1,35 +1,74 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/productNameTextView"
+    <!-- Główna zawartość ekranu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginBottom="56dp">
+
+        <TextView
+            android:id="@+id/productNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/totalWeightTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ogólna ilość: 0 g"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/addBatchButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Dodaj partię"
+            android:layout_marginBottom="16dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/batchesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="597dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Pasek z przyciskami na dole -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
+        android:background="#2196F3"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_gravity="bottom">
 
-    <TextView
-        android:id="@+id/totalWeightTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ogólna ilość: 0 g"
-        android:layout_marginBottom="8dp" />
+        <!-- Przycisk Moj Magazyn -->
+        <Button
+            android:id="@+id/mojMagazynButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Mój Magazyn"
+            android:textColor="#FFFFFF"
+            android:onClick="onMojMagazynClick" />
 
-    <Button
-        android:id="@+id/addBatchButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Dodaj partię"
-        android:layout_marginBottom="16dp" />
+        <!-- Przycisk Zobacz Przepisy -->
+        <Button
+            android:id="@+id/zobaczPrzepisyButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Zobacz Przepisy"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/batchesRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-</LinearLayout>
+</FrameLayout>

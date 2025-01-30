@@ -70,6 +70,14 @@ class MainActivity : AppCompatActivity() {
         zobaczPrzepisyButton.setOnClickListener {
             val intent = Intent(this, ListaPrzepisowActivity::class.java)
             startActivity(intent)
+
+            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            startActivity(intent)
+
+            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
+            finish()
         }
     }
 

@@ -37,6 +37,19 @@ class ListaPrzepisowActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val mojMagazynButton: Button = findViewById(R.id.mojMagazynButton)
+        mojMagazynButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+
+            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+
+            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
+            finish()
+        }
+
         przepisyRecyclerView.layoutManager = LinearLayoutManager(this)
         przepisyRecyclerView.adapter = przepisyAdapter
 
@@ -68,7 +81,7 @@ class ListaPrzepisowActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Firebase", "Błąd pobierania przepisów: ${error.message}")
-                Toast.makeText(this@ListaPrzepisowActivity, "Błąd pobierania przepisów", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this@ListaPrzepisowActivity, "Błąd pobierania przepisów", Toast.LENGTH_SHORT).show()
             }
         })
     }
