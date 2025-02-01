@@ -15,7 +15,7 @@
         android:id="@+id/batchNumberEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="odaj Numer partii"
+        android:hint="Podaj Numer partii"
         android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Podaj ilość"
-            android:inputType="number" />
+            android:inputType="numberDecimal" />
 
         <TextView
             android:id="@+id/weightUnitTextView"

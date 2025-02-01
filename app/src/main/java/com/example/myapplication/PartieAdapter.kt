@@ -12,10 +12,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class PartieAdapter(
-    private val partieList: MutableList<Pair<String, Triple<Int, String, String>>>, // Lista partii (ID, (waga, dataWaznosci, numerPartii))
+    private val partieList: MutableList<Pair<String, Triple<Double, String, String>>>, // Waga jako Float
     private val onDeleteClick: (String) -> Unit,
-    private val onEditClick: (String, Int) -> Unit,
-    private val unit: String // Przechowywanie jednostki
+    private val onEditClick: (String, Double) -> Unit, // Waga jako Float
+    private val unit: String // Jednostka
 ) : RecyclerView.Adapter<PartieAdapter.PartieViewHolder>() {
 
     class PartieViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -36,7 +36,7 @@ class PartieAdapter(
         val (batchId, data) = partieList[position]
         val (weight, expiryDate, batchNumber) = data
 
-        holder.batchWeightTextView.text = "Partia: $weight ${unit}"
+        holder.batchWeightTextView.text = "Partia: $weight $unit"
         holder.batchExpiryDateTextView.text = "Data ważności: $expiryDate"
         holder.batchNumberTextView.text = "Numer partii: $batchNumber"
 
@@ -44,7 +44,7 @@ class PartieAdapter(
         val today = Calendar.getInstance()
 
         val context = holder.itemView.context
-        val defaultBlue = ContextCompat.getColor(context, R.color.blue) // Pobranie koloru z zasobów
+        val defaultBlue = ContextCompat.getColor(context, R.color.blue)
 
         // Resetowanie kolorów do domyślnego przed ich zmianą
         holder.batchWeightTextView.setTextColor(defaultBlue)
@@ -66,13 +66,13 @@ class PartieAdapter(
                     holder.batchNumberTextView.setTextColor(Color.RED)
                 }
                 daysDifference < 7 -> { // Tydzień lub mniej do końca (pomarańczowy)
-                    holder.batchWeightTextView.setTextColor(Color.parseColor("#FFA500")) // Pomarańczowy
+                    holder.batchWeightTextView.setTextColor(Color.parseColor("#FFA500"))
                     holder.batchExpiryDateTextView.setTextColor(Color.parseColor("#FFA500"))
                     holder.batchNumberTextView.setTextColor(Color.parseColor("#FFA500"))
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace() // Logowanie błędu parsowania
+            e.printStackTrace()
         }
 
         holder.deleteButton.setOnClickListener {
@@ -80,7 +80,7 @@ class PartieAdapter(
         }
 
         holder.editButton.setOnClickListener {
-            onEditClick(batchId, weight)
+            onEditClick(batchId, weight) // Przekazanie `Float`
         }
     }
 

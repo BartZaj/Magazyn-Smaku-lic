@@ -25,8 +25,8 @@ class ProduktDetailsActivity : AppCompatActivity() {
 
     private lateinit var databaseRef: DatabaseReference
     private lateinit var partieAdapter: PartieAdapter
-    private var partieList = mutableListOf<Pair<String, Triple<Int, String, String>>>() // Lista partii (ID, (waga, dataWaznosci, numerPartii))
-    private var totalWeight = 0
+    private var partieList = mutableListOf<Pair<String, Triple<Double, String, String>>>() // Waga jako Float
+    private var totalWeight = 0.0
 
     private var uid: String = ""
     private var idProduktu: String = ""
@@ -108,45 +108,32 @@ class ProduktDetailsActivity : AppCompatActivity() {
         databaseRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 partieList.clear()
-                totalWeight = 0
+                totalWeight = 0.0
 
                 val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
                 val today = Calendar.getInstance()
 
                 for (batchSnapshot in snapshot.children) {
                     val batchId = batchSnapshot.key ?: continue
-                    val weight = batchSnapshot.child("waga").getValue(Int::class.java) ?: 0
-                    val expiryDate =
-                        batchSnapshot.child("dataWaznosci").getValue(String::class.java)
-                            ?: "Brak daty"
-                    val unit = jednostkaProduktu // Przypisanie jednostki
-                    val batchNumber =
-                        batchSnapshot.child("numerPartii").getValue(String::class.java)
-                            ?: "Brak numeru"
+                    val weight = batchSnapshot.child("waga").getValue(Double::class.java) ?: 0.0
+                    val expiryDate = batchSnapshot.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
+                    val batchNumber = batchSnapshot.child("numerPartii").getValue(String::class.java) ?: "Brak numeru"
 
                     try {
                         val expiryDateCalendar = Calendar.getInstance().apply {
                             time = dateFormat.parse(expiryDate) ?: Date()
                         }
-                        val daysDifference =
-                            ((expiryDateCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+                        val daysDifference = ((expiryDateCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
 
                         if (daysDifference >= 0) {
                             totalWeight += weight
                         }
 
-                        // Dodanie jednostki do danych partii
                         partieList.add(batchId to Triple(weight, expiryDate, batchNumber))
 
                     } catch (e: Exception) {
                         Log.e("DateParsing", "Błąd parsowania daty: $expiryDate", e)
-                        partieList.add(
-                            batchId to Triple(
-                                weight,
-                                "Nieprawidłowa data",
-                                "Brak numeru"
-                            )
-                        )
+                        partieList.add(batchId to Triple(weight, "Nieprawidłowa data", "Brak numeru"))
                     }
                 }
 
@@ -177,15 +164,15 @@ class ProduktDetailsActivity : AppCompatActivity() {
         dialogBuilder.setView(dialogLayout)
 
         dialogBuilder.setPositiveButton("Dodaj") { _, _ ->
-            val weight = weightInput.text.toString().toIntOrNull()
-            val batchNumber = batchNumberInput.text.toString() // Numer partii
+            val weight = weightInput.text.toString().toDoubleOrNull()
+            val batchNumber = batchNumberInput.text.toString()
             val selectedDay = datePicker.dayOfMonth
             val selectedMonth = datePicker.month + 1
             val selectedYear = datePicker.year
             val selectedDate = String.format("%02d-%02d-%d", selectedDay, selectedMonth, selectedYear)
 
             if (weight != null && weight > 0) {
-                addNewBatch(batchNumber, weight, selectedDate) // Zaktualizuj wywołanie
+                addNewBatch(batchNumber, weight, selectedDate)
             } else {
                 Toast.makeText(this, "Podaj poprawną wagę", Toast.LENGTH_SHORT).show()
             }
@@ -196,13 +183,13 @@ class ProduktDetailsActivity : AppCompatActivity() {
         dialogBuilder.show()
     }
 
-    private fun addNewBatch(batchNumber: String, weight: Int, expiryDate: String) {
+    private fun addNewBatch(batchNumber: String, weight: Double, expiryDate: String) {
         val newBatchId = databaseRef.push().key
         if (newBatchId != null) {
             val batchData = mapOf(
                 "waga" to weight,
                 "dataWaznosci" to expiryDate,
-                "numerPartii" to batchNumber // Dodaj numer partii
+                "numerPartii" to batchNumber
             )
             databaseRef.child(newBatchId).setValue(batchData)
 
@@ -212,7 +199,6 @@ class ProduktDetailsActivity : AppCompatActivity() {
             partieAdapter.notifyDataSetChanged()
         }
     }
-
     private fun deleteBatch(batchId: String) {
         val batchWeight = partieList.find { it.first == batchId }?.second?.first ?: return
         databaseRef.child(batchId).removeValue()
@@ -220,7 +206,7 @@ class ProduktDetailsActivity : AppCompatActivity() {
         updateTotalWeightInDatabase(totalWeight - batchWeight)
     }
 
-    private fun showEditBatchDialog(batchId: String, currentWeight: Int) {
+    private fun showEditBatchDialog(batchId: String, currentWeight: Double) {
         val dialogBuilder = AlertDialog.Builder(this)
         dialogBuilder.setTitle("Edytuj partię")
 
@@ -230,7 +216,7 @@ class ProduktDetailsActivity : AppCompatActivity() {
         dialogBuilder.setView(dialogLayout)
 
         dialogBuilder.setPositiveButton("Zaktualizuj") { _, _ ->
-            val weightToSubtract = weightInput.text.toString().toIntOrNull()
+            val weightToSubtract = weightInput.text.toString().toDoubleOrNull()
             if (weightToSubtract != null && weightToSubtract > 0) {
                 updateBatchWeight(batchId, currentWeight, weightToSubtract)
             } else {
@@ -243,7 +229,7 @@ class ProduktDetailsActivity : AppCompatActivity() {
         dialogBuilder.show()
     }
 
-    private fun updateBatchWeight(batchId: String, currentWeight: Int, weightToSubtract: Int) {
+    private fun updateBatchWeight(batchId: String, currentWeight: Double, weightToSubtract: Double) {
         val newWeight = currentWeight - weightToSubtract
         if (newWeight >= 0) {
             databaseRef.child(batchId).child("waga").setValue(newWeight)
@@ -253,7 +239,9 @@ class ProduktDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateTotalWeightInDatabase(newTotalWeight: Int) {
-        databaseRef.parent?.child("ogolnaIlosc")?.setValue(newTotalWeight)
+
+    private fun updateTotalWeightInDatabase(newTotalWeight: Double) {
+        val roundedWeight = String.format(Locale.US, "%.2f", newTotalWeight).toDouble()
+        databaseRef.parent?.child("ogolnaIlosc")?.setValue(roundedWeight)
     }
 }

@@ -106,12 +106,12 @@ class ProductsActivity : AppCompatActivity() {
 
                     val partieRef = firebaseBaza.child(idProduktu).child("partie")
                     partieRef.get().addOnSuccessListener { partieSnapshot ->
-                        var iloscOgolna = 0
+                        var iloscOgolna = 0.0
                         val today = Calendar.getInstance()
                         val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
                         for (partia in partieSnapshot.children) {
-                            val iloscPartii = partia.child("waga").getValue(Int::class.java) ?: 0
+                            val iloscPartii = partia.child("waga").getValue(Double::class.java) ?: 0.0
                             val terminWaznosciString = partia.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
 
                             try {
