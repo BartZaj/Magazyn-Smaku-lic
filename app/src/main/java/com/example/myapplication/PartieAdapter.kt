@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,12 +36,20 @@ class PartieAdapter(
         val (batchId, data) = partieList[position]
         val (weight, expiryDate, batchNumber) = data
 
-        holder.batchWeightTextView.text = "Partia: $weight ${unit}" // Dodaj jednostkę do wagi
+        holder.batchWeightTextView.text = "Partia: $weight ${unit}"
         holder.batchExpiryDateTextView.text = "Data ważności: $expiryDate"
-        holder.batchNumberTextView.text = "Numer partii: $batchNumber" // Numer partii
+        holder.batchNumberTextView.text = "Numer partii: $batchNumber"
 
         val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         val today = Calendar.getInstance()
+
+        val context = holder.itemView.context
+        val defaultBlue = ContextCompat.getColor(context, R.color.blue) // Pobranie koloru z zasobów
+
+        // Resetowanie kolorów do domyślnego przed ich zmianą
+        holder.batchWeightTextView.setTextColor(defaultBlue)
+        holder.batchExpiryDateTextView.setTextColor(defaultBlue)
+        holder.batchNumberTextView.setTextColor(defaultBlue)
 
         try {
             val expiryDateCalendar = Calendar.getInstance().apply {
@@ -51,20 +60,19 @@ class PartieAdapter(
                 ((expiryDateCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
 
             when {
-                daysDifference < 0 -> { // Po terminie
+                daysDifference < 0 -> { // Po terminie (czerwony)
                     holder.batchWeightTextView.setTextColor(Color.RED)
                     holder.batchExpiryDateTextView.setTextColor(Color.RED)
                     holder.batchNumberTextView.setTextColor(Color.RED)
                 }
-                daysDifference < 7 -> { // Tydzień lub mniej do końca
+                daysDifference < 7 -> { // Tydzień lub mniej do końca (pomarańczowy)
                     holder.batchWeightTextView.setTextColor(Color.parseColor("#FFA500")) // Pomarańczowy
-                    holder.batchExpiryDateTextView.setTextColor(Color.parseColor("#FFA500")) // Pomarańczowy
+                    holder.batchExpiryDateTextView.setTextColor(Color.parseColor("#FFA500"))
                     holder.batchNumberTextView.setTextColor(Color.parseColor("#FFA500"))
                 }
             }
         } catch (e: Exception) {
-            holder.batchWeightTextView.setTextColor(Color.BLACK)
-            holder.batchExpiryDateTextView.setTextColor(Color.BLACK)
+            e.printStackTrace() // Logowanie błędu parsowania
         }
 
         holder.deleteButton.setOnClickListener {

@@ -13,19 +13,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class ProductsActivity : AppCompatActivity() {
 
     private lateinit var produktyRecyclerView: RecyclerView
     private lateinit var produktyAdapter: ProduktyAdapter
-    private val listaProduktow = mutableListOf<Pair<String, String>>() // Lista: ID produktu, Nazwa produktu
+    private val listaProduktow = mutableListOf<Triple<String, String, String>>() // ID, Nazwa, Ilość
     private lateinit var firebaseBaza: DatabaseReference
+    private var idKategorii: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_products)
 
-        val idKategorii = intent.getStringExtra("idKategorii")
+        idKategorii = intent.getStringExtra("idKategorii")
         val nazwaKategorii = intent.getStringExtra("nazwaKategorii")
 
         if (idKategorii == null) {
@@ -55,32 +60,20 @@ class ProductsActivity : AppCompatActivity() {
         val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
         zobaczPrzepisyButton.setOnClickListener {
             val intent = Intent(this, ListaPrzepisowActivity::class.java)
-            startActivity(intent)
-
-            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
             startActivity(intent)
-
-            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
             finish()
         }
 
         val mojMagazynButton: Button = findViewById(R.id.mojMagazynButton)
         mojMagazynButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
-            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
-
-            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
             finish()
         }
 
         produktyAdapter = ProduktyAdapter(listaProduktow) { idProduktu, nazwaProduktu ->
-            // Przejście do ProduktDetailsActivity
             val intent = Intent(this, ProduktDetailsActivity::class.java).apply {
                 putExtra("uid", uid)
                 putExtra("idKategorii", idKategorii)
@@ -96,17 +89,62 @@ class ProductsActivity : AppCompatActivity() {
     }
 
     private fun loadProducts() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val kategoriaId = idKategorii ?: return
+
         firebaseBaza.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                listaProduktow.clear()
+                val tempProduktow = mutableListOf<Triple<String, String, String>>() // Tymczasowa lista
+
+                val licznikProduktow = snapshot.childrenCount
+                var przetworzoneProdukty = 0
+
                 for (produktSnapshot in snapshot.children) {
                     val idProduktu = produktSnapshot.key ?: continue
                     val nazwaProduktu = produktSnapshot.child("name").getValue(String::class.java) ?: "Nieznany produkt"
-                    listaProduktow.add(idProduktu to nazwaProduktu)
-                }
-                listaProduktow.sortBy { it.second }
+                    val jednostka = produktSnapshot.child("unit").getValue(String::class.java) ?: ""
 
-                produktyAdapter.notifyDataSetChanged()
+                    val partieRef = firebaseBaza.child(idProduktu).child("partie")
+                    partieRef.get().addOnSuccessListener { partieSnapshot ->
+                        var iloscOgolna = 0
+                        val today = Calendar.getInstance()
+                        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+                        for (partia in partieSnapshot.children) {
+                            val iloscPartii = partia.child("waga").getValue(Int::class.java) ?: 0
+                            val terminWaznosciString = partia.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
+
+                            try {
+                                val terminWaznosciCalendar = Calendar.getInstance().apply {
+                                    time = dateFormat.parse(terminWaznosciString) ?: Date()
+                                }
+                                val daysDifference = ((terminWaznosciCalendar.timeInMillis - today.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+
+                                if (daysDifference >= 0) {
+                                    iloscOgolna += iloscPartii
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ParseError", "Błąd parsowania daty: ${e.message}")
+                            }
+                        }
+
+                        // Po zakończeniu przetwarzania partii dla tego produktu, dodajemy do listy
+                        tempProduktow.add(Triple(idProduktu, nazwaProduktu, "$iloscOgolna $jednostka"))
+
+                        // Sprawdzamy, czy wszystkie produkty zostały przetworzone
+                        przetworzoneProdukty++
+                        if (przetworzoneProdukty == licznikProduktow.toInt()) {
+                            tempProduktow.sortBy { it.second }
+
+                            // Przypisujemy zaktualizowaną listę do głównej
+                            listaProduktow.clear()
+                            listaProduktow.addAll(tempProduktow)
+
+                            // Odświeżamy adapter RAZ po zakończeniu pętli
+                            produktyAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {

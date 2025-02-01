@@ -18,8 +18,17 @@
 
     <EditText
         android:id="@+id/gramaturaEditText"
-        android:layout_width="wrap_content"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:inputType="number"
-        android:hint="Ilosc" />
+        android:hint="Ilość"
+        android:enabled="false"/>
+
+    <TextView
+        android:id="@+id/jednostkaTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="g"
+        android:textSize="16sp"/>
 </LinearLayout>

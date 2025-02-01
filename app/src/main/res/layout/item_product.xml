@@ -6,9 +6,8 @@
     android:padding="8dp"
     android:elevation="4dp"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/blue_border"> <!-- Dodano obramowanie -->
+    android:background="@drawable/blue_border">
 
-    <!-- Tekst wyświetlający nazwę kategorii -->
     <TextView
         android:id="@+id/produktNameTextView"
         android:layout_width="match_parent"
@@ -17,5 +16,13 @@
         android:padding="8dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="@color/blue" /> <!-- Tekst w kolorze ramki -->
+        android:textColor="@color/blue"/>
+
+    <TextView
+        android:id="@+id/produktIloscTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:padding="4dp"
+        android:textColor="@color/blue"/>
 </LinearLayout>

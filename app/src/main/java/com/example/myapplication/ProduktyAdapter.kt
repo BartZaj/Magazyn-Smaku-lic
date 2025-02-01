@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class ProduktyAdapter(
-    private val listaProduktow: MutableList<Pair<String, String>>, // Lista: ID produktu, Nazwa produktu
+    private val listaProduktow: MutableList<Triple<String, String, String>>, // ID, Nazwa, Ilość
     private val onProduktClick: (String, String) -> Unit
 ) : RecyclerView.Adapter<ProduktyAdapter.ProduktViewHolder>() {
 
@@ -20,8 +20,9 @@ class ProduktyAdapter(
     }
 
     override fun onBindViewHolder(holder: ProduktViewHolder, position: Int) {
-        val (idProduktu, nazwaProduktu) = listaProduktow[position]
+        val (idProduktu, nazwaProduktu, iloscOgolna) = listaProduktow[position]
         holder.view.findViewById<TextView>(R.id.produktNameTextView).text = nazwaProduktu
+        holder.view.findViewById<TextView>(R.id.produktIloscTextView).text = "Ilość: $iloscOgolna"
 
         holder.view.setOnClickListener {
             onProduktClick(idProduktu, nazwaProduktu)

@@ -19,7 +19,8 @@ data class ProduktWybrany(
     val id: String,
     val name: String,
     var ilosc: Int,
-    val id_kategorii: String
+    val id_kategorii: String,
+    val unit: String
 )
 
 class DodajPrzepisActivity : AppCompatActivity() {
@@ -64,7 +65,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         if (uid != null) {
             FirebaseDatabase.getInstance().getReference("users/$uid/kategorie")
                 .get().addOnSuccessListener { snapshot ->
-                    val allProducts = mutableListOf<Triple<String, String, String>>() // Lista do przechowywania ID, nazwy i ID kategorii
+                    val allProducts = mutableListOf<ProduktWybrany>()
 
                     for (categorySnapshot in snapshot.children) {
                         val idKategorii = categorySnapshot.key ?: continue
@@ -72,15 +73,17 @@ class DodajPrzepisActivity : AppCompatActivity() {
                         for (child in produktySnapshot.children) {
                             val id = child.key ?: continue
                             val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
-                            allProducts.add(Triple(id, nazwa, idKategorii)) // Dodajemy (ID, nazwa, ID kategorii)
+                            val unit = child.child("unit").getValue(String::class.java) ?: ""
+
+                            allProducts.add(ProduktWybrany(id, nazwa, 0, idKategorii, unit))
                         }
                     }
 
-                    allProducts.sortBy { it.second }
+                    allProducts.sortBy { it.name }
 
                     produktyLinearLayout.removeAllViews()
-                    for ((id, nazwa, idKategorii) in allProducts) {
-                        val productView = createProductView(id, nazwa, idKategorii)
+                    for (produkt in allProducts) {
+                        val productView = createProductView(produkt)
                         produktyLinearLayout.addView(productView)
                     }
                 }
@@ -89,14 +92,16 @@ class DodajPrzepisActivity : AppCompatActivity() {
         }
     }
 
-    private fun createProductView(id: String, nazwa: String, idKategorii: String): View {
+    private fun createProductView(produkt: ProduktWybrany): View {
         val productView = LayoutInflater.from(this).inflate(R.layout.item_produkt_do_wyboru, null)
 
         val checkBox: CheckBox = productView.findViewById(R.id.produktCheckBox)
         val nazwaTextView: TextView = productView.findViewById(R.id.nazwaProduktuTextView)
         val gramaturaEditText: EditText = productView.findViewById(R.id.gramaturaEditText)
+        val jednostkaTextView: TextView = productView.findViewById(R.id.jednostkaTextView)
 
-        nazwaTextView.text = nazwa
+        nazwaTextView.text = produkt.name
+        jednostkaTextView.text = produkt.unit // Ustawienie jednostki w widoku
 
         gramaturaEditText.isEnabled = false
 
@@ -105,24 +110,23 @@ class DodajPrzepisActivity : AppCompatActivity() {
                 gramaturaEditText.isEnabled = true
                 val gramatura = gramaturaEditText.text.toString().toIntOrNull() ?: 0
                 if (gramatura > 0) {
-                    val produkt = ProduktWybrany(id, nazwa, gramatura, idKategorii)
-                    wybraneProdukty.add(produkt)
+                    wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }
             } else {
                 gramaturaEditText.isEnabled = false
                 gramaturaEditText.setText("")
-                wybraneProdukty.removeAll { it.name == nazwa }
+                wybraneProdukty.removeAll { it.id == produkt.id }
             }
         }
 
         gramaturaEditText.addTextChangedListener {
             val gramatura = it.toString().toIntOrNull() ?: 0
             if (checkBox.isChecked) {
-                val produkt = wybraneProdukty.find { it.name == nazwa }
-                if (produkt != null) {
-                    produkt.ilosc = gramatura
+                val produktWybrany = wybraneProdukty.find { it.id == produkt.id }
+                if (produktWybrany != null) {
+                    produktWybrany.ilosc = gramatura
                 } else if (gramatura > 0) {
-                    wybraneProdukty.add(ProduktWybrany(id, nazwa, gramatura, idKategorii))
+                    wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }
             }
         }
@@ -169,8 +173,6 @@ class DodajPrzepisActivity : AppCompatActivity() {
                         }
                     }
             }
-        } else {
-            Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
         }
     }
 }
