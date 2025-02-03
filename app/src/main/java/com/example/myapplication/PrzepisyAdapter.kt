@@ -29,7 +29,13 @@ class PrzepisyAdapter(
         val id = przepis["id"] ?: return
 
         holder.nazwaTextView.text = nazwa
-        holder.itemView.setOnClickListener { onClick(przepis) }
+        holder.itemView.setOnClickListener {
+            onClick(przepis)
+        }
+
+        holder.usunButton.setOnClickListener {
+            onDelete(id)
+        }
     }
 
     override fun getItemCount() = przepisy.size

@@ -195,17 +195,17 @@ class ProduktDetailsActivity : AppCompatActivity() {
             )
             databaseRef.child(newBatchId).setValue(batchData)
 
-            updateTotalWeightInDatabase(totalWeight + weight)
+            //updateTotalWeightInDatabase(totalWeight + weight)
 
-            partieList.add(newBatchId to Triple(weight, expiryDate, batchNumber))
+            //partieList.add(newBatchId to Triple(weight, expiryDate, batchNumber))
             partieAdapter.notifyDataSetChanged()
         }
     }
     private fun deleteBatch(batchId: String) {
-        val batchWeight = partieList.find { it.first == batchId }?.second?.first ?: return
+        //val batchWeight = partieList.find { it.first == batchId }?.second?.first ?: return
         databaseRef.child(batchId).removeValue()
 
-        updateTotalWeightInDatabase(totalWeight - batchWeight)
+        //updateTotalWeightInDatabase(totalWeight - batchWeight)
     }
 
     private fun showEditBatchDialog(batchId: String, currentWeight: Double) {
@@ -236,7 +236,7 @@ class ProduktDetailsActivity : AppCompatActivity() {
         val newWeightFormatted = String.format("%.2f", newWeight).replace(',', '.').toDouble()
         if (newWeight >= 0) {
             databaseRef.child(batchId).child("waga").setValue(newWeightFormatted)
-            updateTotalWeightInDatabase(totalWeight - weightToSubtract)
+            //updateTotalWeightInDatabase(totalWeight - weightToSubtract)
         } else {
             Toast.makeText(this, "Waga nie może być mniejsza niż 0", Toast.LENGTH_SHORT).show()
         }
