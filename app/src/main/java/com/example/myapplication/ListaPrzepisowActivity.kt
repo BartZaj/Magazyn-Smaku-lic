@@ -24,12 +24,20 @@ class ListaPrzepisowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_przepisow)
 
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            Toast.makeText(this, "Użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+        firebaseRef = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy")
+
         przepisyRecyclerView = findViewById(R.id.przepisyRecyclerView)
-        przepisyAdapter = PrzepisyAdapter(przepisyList) { przepis ->
+        przepisyAdapter = PrzepisyAdapter(przepisyList, { przepis ->
             val intent = Intent(this, SzczegolyPrzepisuActivity::class.java)
             intent.putExtra("przepisId", przepis["id"])
-            startActivity(intent)
-        }
+            startActivity(intent) }, { recipeId -> deleteRecipe(recipeId)
+        })
 
         val dodajPrzepisButton: Button = findViewById(R.id.dodajPrzepisButton)
         dodajPrzepisButton.setOnClickListener {
@@ -53,15 +61,7 @@ class ListaPrzepisowActivity : AppCompatActivity() {
         przepisyRecyclerView.layoutManager = LinearLayoutManager(this)
         przepisyRecyclerView.adapter = przepisyAdapter
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val uid = currentUser?.uid
-
-        if (uid != null) {
-            firebaseRef = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy")
-            loadPrzepisy()
-        } else {
-            Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
-        }
+        loadPrzepisy()
     }
 
     private fun loadPrzepisy() {
@@ -84,5 +84,15 @@ class ListaPrzepisowActivity : AppCompatActivity() {
                 //Toast.makeText(this@ListaPrzepisowActivity, "Błąd pobierania przepisów", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun deleteRecipe(recipeId: String) {
+        firebaseRef.child(recipeId).removeValue().addOnSuccessListener {
+            przepisyList.removeAll { it["id"] == recipeId }
+            przepisyAdapter.notifyDataSetChanged()
+            Toast.makeText(this, "Przepis usunięty", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener {
+            Toast.makeText(this, "Błąd usuwania przepisu", Toast.LENGTH_SHORT).show()
+        }
     }
 }

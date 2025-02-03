@@ -20,7 +20,7 @@
         android:id="@+id/gramaturaEditText"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:inputType="numberDecimal"
         android:hint="Ilość"
         android:enabled="false"/>
 

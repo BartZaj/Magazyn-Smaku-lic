@@ -137,9 +137,11 @@ class ProduktDetailsActivity : AppCompatActivity() {
                     }
                 }
 
-                updateTotalWeightInDatabase(totalWeight)
+                val roundedWeight = String.format(Locale.US, "%.2f", totalWeight).toDouble()
 
-                totalWeightTextView.text = "Ogólna ilość: $totalWeight $jednostkaProduktu"
+                updateTotalWeightInDatabase(roundedWeight)
+
+                totalWeightTextView.text = "Ogólna ilość: $roundedWeight $jednostkaProduktu"
                 partieAdapter.notifyDataSetChanged()
             }
 
@@ -231,8 +233,9 @@ class ProduktDetailsActivity : AppCompatActivity() {
 
     private fun updateBatchWeight(batchId: String, currentWeight: Double, weightToSubtract: Double) {
         val newWeight = currentWeight - weightToSubtract
+        val newWeightFormatted = String.format("%.2f", newWeight).replace(',', '.').toDouble()
         if (newWeight >= 0) {
-            databaseRef.child(batchId).child("waga").setValue(newWeight)
+            databaseRef.child(batchId).child("waga").setValue(newWeightFormatted)
             updateTotalWeightInDatabase(totalWeight - weightToSubtract)
         } else {
             Toast.makeText(this, "Waga nie może być mniejsza niż 0", Toast.LENGTH_SHORT).show()
@@ -241,7 +244,6 @@ class ProduktDetailsActivity : AppCompatActivity() {
 
 
     private fun updateTotalWeightInDatabase(newTotalWeight: Double) {
-        val roundedWeight = String.format(Locale.US, "%.2f", newTotalWeight).toDouble()
-        databaseRef.parent?.child("ogolnaIlosc")?.setValue(roundedWeight)
+        databaseRef.parent?.child("ogolnaIlosc")?.setValue(newTotalWeight)
     }
 }

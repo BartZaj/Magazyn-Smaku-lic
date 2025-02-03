@@ -128,8 +128,10 @@ class ProductsActivity : AppCompatActivity() {
                             }
                         }
 
+                        val roundedWeight = String.format(Locale.US, "%.2f", iloscOgolna).toDouble()
+
                         // Po zakończeniu przetwarzania partii dla tego produktu, dodajemy do listy
-                        tempProduktow.add(Triple(idProduktu, nazwaProduktu, "$iloscOgolna $jednostka"))
+                        tempProduktow.add(Triple(idProduktu, nazwaProduktu, "$roundedWeight $jednostka"))
 
                         // Sprawdzamy, czy wszystkie produkty zostały przetworzone
                         przetworzoneProdukty++

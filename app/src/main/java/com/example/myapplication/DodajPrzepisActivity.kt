@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth
 data class ProduktWybrany(
     val id: String,
     val name: String,
-    var ilosc: Int,
+    var ilosc: Double,
     val id_kategorii: String,
     val unit: String
 )
@@ -75,7 +75,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
                             val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
                             val unit = child.child("unit").getValue(String::class.java) ?: ""
 
-                            allProducts.add(ProduktWybrany(id, nazwa, 0, idKategorii, unit))
+                            allProducts.add(ProduktWybrany(id, nazwa, 0.0, idKategorii, unit))
                         }
                     }
 
@@ -108,8 +108,8 @@ class DodajPrzepisActivity : AppCompatActivity() {
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 gramaturaEditText.isEnabled = true
-                val gramatura = gramaturaEditText.text.toString().toIntOrNull() ?: 0
-                if (gramatura > 0) {
+                val gramatura = gramaturaEditText.text.toString().toDoubleOrNull() ?: 0.0
+                if (gramatura > 0.0) {
                     wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }
             } else {
@@ -120,12 +120,12 @@ class DodajPrzepisActivity : AppCompatActivity() {
         }
 
         gramaturaEditText.addTextChangedListener {
-            val gramatura = it.toString().toIntOrNull() ?: 0
+            val gramatura = it.toString().toDoubleOrNull() ?: 0.0
             if (checkBox.isChecked) {
                 val produktWybrany = wybraneProdukty.find { it.id == produkt.id }
                 if (produktWybrany != null) {
                     produktWybrany.ilosc = gramatura
-                } else if (gramatura > 0) {
+                } else if (gramatura > 0.0) {
                     wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }
             }

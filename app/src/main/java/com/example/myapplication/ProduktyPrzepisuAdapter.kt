@@ -21,8 +21,8 @@ class ProduktyPrzepisuAdapter(
         val produkt = produktyList[position]
 
         val nazwa = produkt["nazwa"] as? String ?: "Nieznany"
-        val iloscPrzepis = produkt["iloscPrzepis"] as? Int ?: 0
-        val iloscOgolna = produkt["iloscOgolna"] as? Int ?: 0
+        val iloscPrzepis = produkt["iloscPrzepis"] as? Double ?: 0.0
+        val iloscOgolna = produkt["iloscOgolna"] as? Double ?: 0.0
         val jednostka = produkt["jednostka"] as? String ?: "szt."
         val idProduktu = produkt["id"] as? String ?: ""
         val idKategorii = produkt["idKategorii"] as? String ?: ""

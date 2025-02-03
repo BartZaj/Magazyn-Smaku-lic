@@ -110,7 +110,7 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
             produktySnapshot.children.forEach { produkt ->
                 val id = produkt.key ?: return@forEach
                 val nazwaProduktu = produkt.child("name").getValue(String::class.java) ?: "Nieznany"
-                val iloscPrzepis = produkt.child("ilosc").getValue(Int::class.java) ?: 0
+                val iloscPrzepis = produkt.child("ilosc").getValue(Double::class.java) ?: 0.0
                 val idKategorii = produkt.child("id_kategorii").getValue(String::class.java) ?: "Nieznany"
 
                 FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$id")
@@ -119,12 +119,12 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
 
                         FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$id/partie")
                             .get().addOnSuccessListener { partieSnapshot ->
-                                var iloscOgolna = 0
+                                var iloscOgolna = 0.0
                                 val today = Calendar.getInstance()
                                 val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
                                 partieSnapshot.children.forEach { partia ->
-                                    val iloscPartii = partia.child("waga").getValue(Int::class.java) ?: 0
+                                    val iloscPartii = partia.child("waga").getValue(Double::class.java) ?: 0.0
                                     val terminWaznosciString = partia.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
 
                                     try {
@@ -142,11 +142,13 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
                                     }
                                 }
 
+                                val roundedWeight = String.format(Locale.US, "%.2f", iloscOgolna).toDouble()
+
                                 val produktMap = mutableMapOf(
                                     "nazwa" to nazwaProduktu,
                                     "iloscPrzepis" to iloscPrzepis,
                                     "iloscPrzepisBazowa" to iloscPrzepis,
-                                    "iloscOgolna" to iloscOgolna,
+                                    "iloscOgolna" to roundedWeight,
                                     "id" to id,
                                     "idKategorii" to idKategorii,
                                     "jednostka" to jednostka // Dodajemy jednostkę
@@ -170,12 +172,13 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
     }
 
     private fun przeliczProdukty(iloscPosilkow: Int) {
-        produktyList.forEach { produkt ->
-            val iloscPrzepisBazowa = produkt["iloscPrzepisBazowa"] as? Int ?: 0
-            val iloscPoZmianie = iloscPrzepisBazowa * iloscPosilkow
+        produktyList.forEachIndexed { index, produkt ->
+            val iloscPrzepisBazowa = (produkt["iloscPrzepisBazowa"] as? Double) ?: 0.0
+            val iloscPoZmianie = (iloscPrzepisBazowa * iloscPosilkow).let {
+                String.format("%.2f", it).replace(',', '.').toDouble()
+            }
             val updatedProdukt = produkt.toMutableMap()
             updatedProdukt["iloscPrzepis"] = iloscPoZmianie
-            val index = produktyList.indexOf(produkt)
             produktyList[index] = updatedProdukt
         }
 
@@ -194,12 +197,12 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
 
             FirebaseDatabase.getInstance().getReference("users/$uid/kategorie/$idKategorii/produkty/$idProduktu/partie")
                 .get().addOnSuccessListener { partieSnapshot ->
-                    var iloscOgolna = 0
+                    var iloscOgolna = 0.0
                     val today = Calendar.getInstance()
                     val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
                     partieSnapshot.children.forEach { partia ->
-                        val iloscPartii = partia.child("waga").getValue(Int::class.java) ?: 0
+                        val iloscPartii = partia.child("waga").getValue(Double::class.java) ?: 0.0
                         val terminWaznosciString = partia.child("dataWaznosci").getValue(String::class.java) ?: "Brak daty"
 
                         try {
@@ -217,8 +220,10 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
                         }
                     }
 
+                    val roundedWeight = String.format(Locale.US, "%.2f", iloscOgolna).toDouble()
+
                     val updatedProdukt = produkt.toMutableMap()
-                    updatedProdukt["iloscOgolna"] = iloscOgolna
+                    updatedProdukt["iloscOgolna"] = roundedWeight
 
                     val index = produktyList.indexOf(produkt)
                     produktyList[index] = updatedProdukt
