@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Główna zawartość ekranu -->
     <LinearLayout
@@ -9,24 +10,42 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginBottom="56dp"> <!-- Zapewnia miejsce na dolny pasek -->
+        android:layout_marginBottom="68dp"> <!-- Zapewnia miejsce na dolny pasek -->
 
         <TextView
             android:id="@+id/nazwaPrzepisuTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nazwa przepisu"
+            android:layout_gravity="center"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="8dp"
+            android:textColor="@color/blue"/>
 
         <TextView
-            android:id="@+id/trescPrzepisuTextView"
+            android:id="@+id/trescPrzepisuLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Treść przepisu:"
+            android:textSize="18sp"
+            android:paddingBottom="8dp"
+            android:textStyle="bold"
+            android:textColor="@color/blue"/>
+
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:paddingBottom="16dp"
-            android:text="Treść przepisu"
-            android:textSize="16sp" />
+            android:layout_height="258dp"
+            android:scrollbars="vertical">
+
+            <TextView
+                android:id="@+id/trescPrzepisuTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="16dp"
+                android:text="Treść przepisu"
+                android:textSize="16sp" />
+        </ScrollView>
 
         <!-- Nowy widok do zmiany ilości posiłków -->
         <TextView
@@ -36,7 +55,8 @@
             android:text="Ilość posiłków:"
             android:textSize="18sp"
             android:paddingBottom="8dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/blue"/>
 
         <EditText
             android:id="@+id/iloscPosilkowEditText"
@@ -45,7 +65,7 @@
             android:inputType="number"
             android:text="1"
             android:padding="8dp"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -53,7 +73,8 @@
             android:text="Lista produktów:"
             android:textSize="18sp"
             android:paddingBottom="8dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/blue"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/produktyRecyclerView"
@@ -71,7 +92,7 @@
         android:padding="10dp"
         android:layout_gravity="bottom">
 
-        <!-- Przycisk Mój Magazyn -->
+        <!-- Przycisk Moj Magazyn -->
         <Button
             android:id="@+id/mojMagazynButton"
             android:layout_width="0dp"
@@ -79,8 +100,9 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Mój Magazyn"
-            android:textColor="#FFFFFF"
-            android:onClick="onMojMagazynClick" />
+            android:textColor="@color/blue"
+            android:backgroundTint="#FFFFFF"
+            app:cornerRadius="5dp"/>
 
         <!-- Przycisk Zobacz Przepisy -->
         <Button
@@ -90,7 +112,9 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="Zobacz Przepisy"
-            android:textColor="#FFFFFF" />
+            android:textColor="@color/blue"
+            android:backgroundTint="#FFFFFF"
+            app:cornerRadius="5dp"/>
     </LinearLayout>
 
 </FrameLayout>

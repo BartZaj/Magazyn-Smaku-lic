@@ -4,10 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.DatePicker
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
@@ -152,37 +155,39 @@ class ProduktDetailsActivity : AppCompatActivity() {
     }
 
     private fun showAddBatchDialog() {
-        val dialogBuilder = AlertDialog.Builder(this)
-        dialogBuilder.setTitle("Dodaj partię")
-
-        val dialogLayout = layoutInflater.inflate(R.layout.dialog_add_batch, null)
-        val weightInput = dialogLayout.findViewById<android.widget.EditText>(R.id.weightEditText)
-        val batchNumberInput = dialogLayout.findViewById<android.widget.EditText>(R.id.batchNumberEditText)
-        val weightUnitText = dialogLayout.findViewById<android.widget.TextView>(R.id.weightUnitTextView)
-        val datePicker = dialogLayout.findViewById<android.widget.DatePicker>(R.id.datePicker)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_batch, null)
+        val weightInput = dialogView.findViewById<EditText>(R.id.weightEditText)
+        val batchNumberInput = dialogView.findViewById<EditText>(R.id.batchNumberEditText)
+        val weightUnitText = dialogView.findViewById<TextView>(R.id.weightUnitTextView)
+        val datePicker = dialogView.findViewById<DatePicker>(R.id.datePicker)
 
         weightUnitText.text = jednostkaProduktu
 
-        dialogBuilder.setView(dialogLayout)
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Dodaj partię")
+            .setView(dialogView)
+            .setPositiveButton("Dodaj") { _, _ ->
+                val weight = weightInput.text.toString().toDoubleOrNull()
+                val batchNumber = batchNumberInput.text.toString()
+                val selectedDay = datePicker.dayOfMonth
+                val selectedMonth = datePicker.month + 1
+                val selectedYear = datePicker.year
+                val selectedDate = String.format("%02d-%02d-%d", selectedDay, selectedMonth, selectedYear)
 
-        dialogBuilder.setPositiveButton("Dodaj") { _, _ ->
-            val weight = weightInput.text.toString().toDoubleOrNull()
-            val batchNumber = batchNumberInput.text.toString()
-            val selectedDay = datePicker.dayOfMonth
-            val selectedMonth = datePicker.month + 1
-            val selectedYear = datePicker.year
-            val selectedDate = String.format("%02d-%02d-%d", selectedDay, selectedMonth, selectedYear)
-
-            if (weight != null && weight > 0) {
-                addNewBatch(batchNumber, weight, selectedDate)
-            } else {
-                Toast.makeText(this, "Podaj poprawną wagę", Toast.LENGTH_SHORT).show()
+                if (weight != null && weight > 0) {
+                    addNewBatch(batchNumber, weight, selectedDate)
+                } else {
+                    Toast.makeText(this, "Podaj poprawną wagę", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+            .setNegativeButton("Anuluj", null)
+            .create()
 
-        dialogBuilder.setNegativeButton("Anuluj") { dialog, _ -> dialog.dismiss() }
+        dialog.show()
 
-        dialogBuilder.show()
+        val defaultBlue = ContextCompat.getColor(this, R.color.blue)
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(defaultBlue)
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(defaultBlue)
     }
 
     private fun addNewBatch(batchNumber: String, weight: Double, expiryDate: String) {
@@ -209,26 +214,31 @@ class ProduktDetailsActivity : AppCompatActivity() {
     }
 
     private fun showEditBatchDialog(batchId: String, currentWeight: Double) {
-        val dialogBuilder = AlertDialog.Builder(this)
-        dialogBuilder.setTitle("Edytuj partię")
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_batch, null)
+        val weightInput = dialogView.findViewById<EditText>(R.id.weightEditText)
+        val weightUnitText = dialogView.findViewById<TextView>(R.id.weightUnitEditTextView)
 
-        val dialogLayout = layoutInflater.inflate(R.layout.dialog_edit_batch, null)
-        val weightInput = dialogLayout.findViewById<android.widget.EditText>(R.id.weightEditText)
+        weightUnitText.text = jednostkaProduktu
 
-        dialogBuilder.setView(dialogLayout)
-
-        dialogBuilder.setPositiveButton("Zaktualizuj") { _, _ ->
-            val weightToSubtract = weightInput.text.toString().toDoubleOrNull()
-            if (weightToSubtract != null && weightToSubtract > 0) {
-                updateBatchWeight(batchId, currentWeight, weightToSubtract)
-            } else {
-                Toast.makeText(this, "Podaj poprawną wagę do odjęcia", Toast.LENGTH_SHORT).show()
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Edytuj partię")
+            .setView(dialogView)
+            .setPositiveButton("Zaktualizuj") { _, _ ->
+                val weightToSubtract = weightInput.text.toString().toDoubleOrNull()
+                if (weightToSubtract != null && weightToSubtract > 0) {
+                    updateBatchWeight(batchId, currentWeight, weightToSubtract)
+                } else {
+                    Toast.makeText(this, "Podaj poprawną wagę do odjęcia", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
+            .setNegativeButton("Anuluj", null)
+            .create()
 
-        dialogBuilder.setNegativeButton("Anuluj") { dialog, _ -> dialog.dismiss() }
+        dialog.show()
 
-        dialogBuilder.show()
+        val defaultBlue = ContextCompat.getColor(this, R.color.blue)
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(defaultBlue)
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(defaultBlue)
     }
 
     private fun updateBatchWeight(batchId: String, currentWeight: Double, weightToSubtract: Double) {

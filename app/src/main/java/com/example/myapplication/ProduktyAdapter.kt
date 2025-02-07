@@ -22,7 +22,7 @@ class ProduktyAdapter(
     override fun onBindViewHolder(holder: ProduktViewHolder, position: Int) {
         val (idProduktu, nazwaProduktu, iloscOgolna) = listaProduktow[position]
         holder.view.findViewById<TextView>(R.id.produktNameTextView).text = nazwaProduktu
-        holder.view.findViewById<TextView>(R.id.produktIloscTextView).text = "Ilość: $iloscOgolna"
+        holder.view.findViewById<TextView>(R.id.produktIloscTextView).text = iloscOgolna
 
         holder.view.setOnClickListener {
             onProduktClick(idProduktu, nazwaProduktu)

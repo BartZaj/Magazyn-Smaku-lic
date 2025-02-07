@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 class ProduktyPrzepisuAdapter(
@@ -29,10 +30,17 @@ class ProduktyPrzepisuAdapter(
 
         holder.nazwaTextView.text = nazwa
 
+        val context = holder.itemView.context
+        val defaultBlue = ContextCompat.getColor(context, R.color.blue)
+
         if (iloscPrzepis > iloscOgolna) {
             holder.nazwaTextView.setTextColor(Color.RED)
+            holder.iloscTextView.setTextColor(Color.RED)
+            holder.iloscOgolnaTextView.setTextColor(Color.RED)
         } else {
-            holder.nazwaTextView.setTextColor(Color.BLACK)
+            holder.nazwaTextView.setTextColor(defaultBlue)
+            holder.iloscTextView.setTextColor(defaultBlue)
+            holder.iloscOgolnaTextView.setTextColor(defaultBlue)
         }
 
         holder.iloscTextView.text = "Ilość w przepisie: $iloscPrzepis $jednostka"

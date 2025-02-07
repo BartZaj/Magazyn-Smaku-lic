@@ -4,7 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="12dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:elevation="4dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/blue_border">
 
     <TextView
         android:id="@+id/nazwaPrzepisuTextView"
@@ -13,11 +15,12 @@
         android:layout_weight="1"
         android:text="Nazwa przepisu"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textColor="@color/blue"/>
 
     <Button
         android:id="@+id/usunPrzepisButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Usuń" />
+        android:text="Usuń"
+        android:backgroundTint="@color/dark_blue" />
 </LinearLayout>

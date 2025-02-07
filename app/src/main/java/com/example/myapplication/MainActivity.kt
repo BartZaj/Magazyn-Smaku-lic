@@ -6,7 +6,9 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -108,5 +110,8 @@ class MainActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        val defaultBlue = ContextCompat.getColor(this, R.color.blue)
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(defaultBlue)
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(defaultBlue)
     }
 }

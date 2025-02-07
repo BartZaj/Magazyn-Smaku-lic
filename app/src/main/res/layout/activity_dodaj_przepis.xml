@@ -49,13 +49,15 @@
             android:id="@+id/anulujButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Anuluj" />
+            android:text="Anuluj"
+            android:backgroundTint="@color/dark_blue"/>
 
         <Button
             android:id="@+id/dodajPrzepisButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dodaj"
+            android:backgroundTint="@color/dark_blue"
             android:layout_marginStart="16dp" />
 
     </LinearLayout>

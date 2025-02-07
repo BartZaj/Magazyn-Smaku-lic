@@ -1,21 +1,35 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Główna zawartość ekranu -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:layout_marginBottom="68dp">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lista Kategorii"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp"
+            android:textColor="@color/blue"/>
 
         <!-- Przycisk dodawania kategorii -->
         <Button
             android:id="@+id/dodajKategorieButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dodaj kategorię"
-            android:layout_gravity="center_horizontal"
+            android:text="+ Dodaj kategorię"
+            android:backgroundTint="@color/dark_blue"
+            android:layout_gravity="right"
             android:layout_marginBottom="16dp" />
 
         <!-- RecyclerView dla kategorii -->
@@ -23,7 +37,6 @@
             android:id="@+id/kategorieRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="597dp"
-            android:layout_marginBottom="60dp"
             android:layout_weight="1" />
     </LinearLayout>
 
@@ -45,7 +58,9 @@
         android:layout_marginEnd="8dp"
         android:layout_weight="1"
         android:text="Mój Magazyn"
-        android:textColor="#FFFFFF" />
+        android:textColor="@color/blue"
+        android:backgroundTint="#FFFFFF"
+        app:cornerRadius="5dp"/>
 
     <!-- Przycisk Zobacz Przepisy -->
     <Button
@@ -55,7 +70,9 @@
         android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:text="Zobacz Przepisy"
-        android:textColor="#FFFFFF" />
+        android:textColor="@color/blue"
+        android:backgroundTint="#FFFFFF"
+        app:cornerRadius="5dp"/>
 </LinearLayout>
 
     </FrameLayout>

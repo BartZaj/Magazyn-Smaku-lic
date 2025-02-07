@@ -7,8 +7,11 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +23,7 @@ import java.util.Locale
 
 class ProductsActivity : AppCompatActivity() {
 
+    private lateinit var categoryNameTextView: TextView
     private lateinit var produktyRecyclerView: RecyclerView
     private lateinit var produktyAdapter: ProduktyAdapter
     private val listaProduktow = mutableListOf<Triple<String, String, String>>() // ID, Nazwa, Ilość
@@ -38,6 +42,9 @@ class ProductsActivity : AppCompatActivity() {
             finish()
             return
         }
+        categoryNameTextView = findViewById(R.id.categoryNameTextView)
+        categoryNameTextView.text = "Kategoria: $nazwaKategorii"
+
 
         title = "Produkty: $nazwaKategorii"
 
@@ -189,5 +196,10 @@ class ProductsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+
+        val defaultBlue = ContextCompat.getColor(this, R.color.blue)
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(defaultBlue)
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(defaultBlue)
+
     }
 }

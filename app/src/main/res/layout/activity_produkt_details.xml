@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Główna zawartość ekranu -->
     <LinearLayout
@@ -8,35 +9,51 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginBottom="56dp">
+        android:layout_marginBottom="68dp">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lista Partii"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp"
+            android:textColor="@color/blue"/>
 
         <TextView
             android:id="@+id/productNameTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Produkt:"
+            android:textColor="@color/blue"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/totalWeightTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ogólna ilość: 0 g"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="8dp"
+            android:textSize="18sp"
+            android:text="Ogólna ilość:"
+            android:textColor="@color/blue" />
 
         <Button
             android:id="@+id/addBatchButton"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dodaj partię"
-            android:layout_marginBottom="16dp" />
+            android:layout_gravity="right"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/dark_blue"
+            android:text="+ Dodaj partię" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/batchesRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="597dp"
-            android:layout_marginBottom="10dp"
             android:layout_weight="1" />
     </LinearLayout>
 
@@ -57,8 +74,9 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Mój Magazyn"
-            android:textColor="#FFFFFF"
-            android:onClick="onMojMagazynClick" />
+            android:textColor="@color/blue"
+            android:backgroundTint="#FFFFFF"
+            app:cornerRadius="5dp"/>
 
         <!-- Przycisk Zobacz Przepisy -->
         <Button
@@ -68,7 +86,9 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="Zobacz Przepisy"
-            android:textColor="#FFFFFF" />
+            android:textColor="@color/blue"
+            android:backgroundTint="#FFFFFF"
+            app:cornerRadius="5dp"/>
     </LinearLayout>
 
 </FrameLayout>

@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:hint="Nazwa kategorii"
         android:inputType="text"
-        android:padding="8dp"
-        android:background="@android:drawable/edit_text" />
+        android:padding="8dp" />
 
 </LinearLayout>

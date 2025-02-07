@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -107,12 +109,14 @@ class DodajPrzepisActivity : AppCompatActivity() {
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                checkBox.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.blue))
                 gramaturaEditText.isEnabled = true
                 val gramatura = gramaturaEditText.text.toString().toDoubleOrNull() ?: 0.0
                 if (gramatura > 0.0) {
                     wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }
             } else {
+                checkBox.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.grey))
                 gramaturaEditText.isEnabled = false
                 gramaturaEditText.setText("")
                 wybraneProdukty.removeAll { it.id == produkt.id }
