@@ -111,10 +111,6 @@ class DodajPrzepisActivity : AppCompatActivity() {
             if (isChecked) {
                 checkBox.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.blue))
                 gramaturaEditText.isEnabled = true
-                val gramatura = gramaturaEditText.text.toString().toDoubleOrNull() ?: 0.0
-                if (gramatura > 0.0) {
-                    wybraneProdukty.add(produkt.copy(ilosc = gramatura))
-                }
             } else {
                 checkBox.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.grey))
                 gramaturaEditText.isEnabled = false
@@ -128,7 +124,11 @@ class DodajPrzepisActivity : AppCompatActivity() {
             if (checkBox.isChecked) {
                 val produktWybrany = wybraneProdukty.find { it.id == produkt.id }
                 if (produktWybrany != null) {
-                    produktWybrany.ilosc = gramatura
+                    if (gramatura > 0.0) {
+                        produktWybrany.ilosc = gramatura
+                    } else {
+                        wybraneProdukty.removeAll { it.id == produkt.id }
+                    }
                 } else if (gramatura > 0.0) {
                     wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }

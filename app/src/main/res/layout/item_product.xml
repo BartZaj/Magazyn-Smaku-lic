@@ -6,21 +6,33 @@
     android:padding="8dp"
     android:elevation="4dp"
     android:layout_marginBottom="8dp"
-    android:background="@drawable/blue_border">
+    android:background="@drawable/blue_border"
+    android:gravity="center_vertical">
 
     <TextView
         android:id="@+id/produktNameTextView"
-        android:layout_width="280dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="3"
         android:textSize="18sp"
         android:padding="8dp"
         android:maxLines="1"
         android:textColor="@color/blue" />
 
+    <ImageView
+        android:id="@+id/expiryIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/expiry_icon"
+        android:visibility="gone"
+        android:contentDescription="Ikona ważności" />
+
     <TextView
         android:id="@+id/produktIloscTextView"
-        android:layout_width="112dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="2"
         android:gravity="end"
         android:padding="4dp"
         android:textColor="@color/blue"

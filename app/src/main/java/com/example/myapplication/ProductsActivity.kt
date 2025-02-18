@@ -26,7 +26,7 @@ class ProductsActivity : AppCompatActivity() {
     private lateinit var categoryNameTextView: TextView
     private lateinit var produktyRecyclerView: RecyclerView
     private lateinit var produktyAdapter: ProduktyAdapter
-    private val listaProduktow = mutableListOf<Triple<String, String, String>>() // ID, Nazwa, Ilość
+    private val listaProduktow = mutableListOf<Pair<String, Triple<String, String, Boolean>>>() // ID, (Nazwa, Ilość, Ostrzeżenie)
     private lateinit var firebaseBaza: DatabaseReference
     private var idKategorii: String? = null
 
@@ -101,7 +101,7 @@ class ProductsActivity : AppCompatActivity() {
 
         firebaseBaza.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val tempProduktow = mutableListOf<Triple<String, String, String>>() // Tymczasowa lista
+                val tempProduktow = mutableListOf<Pair<String, Triple<String, String, Boolean>>>() // Tymczasowa lista
 
                 val licznikProduktow = snapshot.childrenCount
                 var przetworzoneProdukty = 0
@@ -110,6 +110,7 @@ class ProductsActivity : AppCompatActivity() {
                     val idProduktu = produktSnapshot.key ?: continue
                     val nazwaProduktu = produktSnapshot.child("name").getValue(String::class.java) ?: "Nieznany produkt"
                     val jednostka = produktSnapshot.child("unit").getValue(String::class.java) ?: ""
+                    var expiry = false
 
                     val partieRef = firebaseBaza.child(idProduktu).child("partie")
                     partieRef.get().addOnSuccessListener { partieSnapshot ->
@@ -130,6 +131,10 @@ class ProductsActivity : AppCompatActivity() {
                                 if (daysDifference >= 0) {
                                     iloscOgolna += iloscPartii
                                 }
+                                else
+                                {
+                                    expiry = true
+                                }
                             } catch (e: Exception) {
                                 Log.e("ParseError", "Błąd parsowania daty: ${e.message}")
                             }
@@ -138,12 +143,12 @@ class ProductsActivity : AppCompatActivity() {
                         val roundedWeight = String.format(Locale.US, "%.2f", iloscOgolna).toDouble()
 
                         // Po zakończeniu przetwarzania partii dla tego produktu, dodajemy do listy
-                        tempProduktow.add(Triple(idProduktu, nazwaProduktu, "$roundedWeight $jednostka"))
+                        tempProduktow.add(Pair(idProduktu, Triple(nazwaProduktu, "$roundedWeight $jednostka", expiry)))
 
                         // Sprawdzamy, czy wszystkie produkty zostały przetworzone
                         przetworzoneProdukty++
                         if (przetworzoneProdukty == licznikProduktow.toInt()) {
-                            tempProduktow.sortBy { it.second }
+                            tempProduktow.sortBy { it.second.first }
 
                             // Przypisujemy zaktualizowaną listę do głównej
                             listaProduktow.clear()
