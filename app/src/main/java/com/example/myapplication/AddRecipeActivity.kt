@@ -17,7 +17,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 
-data class ProduktWybrany(
+data class Product(
     val id: String,
     val name: String,
     var ilosc: Double,
@@ -25,7 +25,7 @@ data class ProduktWybrany(
     val unit: String
 )
 
-class DodajPrzepisActivity : AppCompatActivity() {
+class AddRecipeActivity : AppCompatActivity() {
 
     private lateinit var nazwaPrzepisuEditText: EditText
     private lateinit var trescPrzepisuEditText: EditText
@@ -35,7 +35,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
 
     private lateinit var firebaseRef: DatabaseReference
 
-    private val wybraneProdukty = mutableListOf<ProduktWybrany>()
+    private val wybraneProdukty = mutableListOf<Product>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +52,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         loadProductsFromFirebase()
 
         dodajButton.setOnClickListener {
-            dodajPrzepisDoFirebase()
+            addRecipeToFirebase()
         }
 
         anulujButton.setOnClickListener {
@@ -67,7 +67,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         if (uid != null) {
             FirebaseDatabase.getInstance().getReference("users/$uid/kategorie")
                 .get().addOnSuccessListener { snapshot ->
-                    val allProducts = mutableListOf<ProduktWybrany>()
+                    val allProducts = mutableListOf<Product>()
 
                     for (categorySnapshot in snapshot.children) {
                         val idKategorii = categorySnapshot.key ?: continue
@@ -77,7 +77,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
                             val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
                             val unit = child.child("unit").getValue(String::class.java) ?: ""
 
-                            allProducts.add(ProduktWybrany(id, nazwa, 0.0, idKategorii, unit))
+                            allProducts.add(Product(id, nazwa, 0.0, idKategorii, unit))
                         }
                     }
 
@@ -94,7 +94,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         }
     }
 
-    private fun createProductView(produkt: ProduktWybrany): View {
+    private fun createProductView(produkt: Product): View {
         val productView = LayoutInflater.from(this).inflate(R.layout.item_produkt_do_wyboru, null)
 
         val checkBox: CheckBox = productView.findViewById(R.id.produktCheckBox)
@@ -138,7 +138,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         return productView
     }
 
-    private fun dodajPrzepisDoFirebase() {
+    private fun addRecipeToFirebase() {
         val nazwaPrzepisu = nazwaPrzepisuEditText.text.toString().trim()
         val trescPrzepisu = trescPrzepisuEditText.text.toString().trim()
 

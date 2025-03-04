@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,7 @@ import com.google.firebase.database.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var kategorieRecyclerView: RecyclerView
-    private lateinit var kategorieAdapter: KategorieAdapter
+    private lateinit var kategorieAdapter: CategoryAdapter
     private val listaKategorii = mutableListOf<Pair<String, String>>() // Lista: ID kategorii, Nazwa kategorii
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +36,9 @@ class MainActivity : AppCompatActivity() {
 
         kategorieRecyclerView = findViewById(R.id.kategorieRecyclerView)
         kategorieRecyclerView.layoutManager = LinearLayoutManager(this)
-        kategorieAdapter = KategorieAdapter(listaKategorii) { idKategorii, nazwaKategorii ->
+        kategorieAdapter = CategoryAdapter(listaKategorii) { idKategorii, nazwaKategorii ->
             val intent = Intent(this, ProductsActivity::class.java)
-            intent.putExtra("idKategorii", idKategorii) // Przekazujemy ID kategorii
+            intent.putExtra("idKategorii", idKategorii)
             intent.putExtra("nazwaKategorii", nazwaKategorii)
             startActivity(intent)
         }
@@ -65,13 +66,12 @@ class MainActivity : AppCompatActivity() {
 
         val dodajKategorieButton: Button = findViewById(R.id.dodajKategorieButton)
         dodajKategorieButton.setOnClickListener {
-            pokazDialogDodawaniaKategorii(firebaseBaza)
+            showAddCategoryDialog(firebaseBaza)
         }
 
         val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
         zobaczPrzepisyButton.setOnClickListener {
-            val intent = Intent(this, ListaPrzepisowActivity::class.java)
-            startActivity(intent)
+            val intent = Intent(this, RecipeListActivity::class.java)
 
             // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -81,9 +81,23 @@ class MainActivity : AppCompatActivity() {
             // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
             finish()
         }
+
+        val logOutButton: ImageButton = findViewById(R.id.logOutButton)
+        logOutButton.setOnClickListener {
+            val preferences = getSharedPreferences("checkbox", MODE_PRIVATE)
+            val editor = preferences.edit()
+            editor.putString("remember", "false")
+            editor.apply()
+
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LogInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
     }
 
-    private fun pokazDialogDodawaniaKategorii(firebaseBaza: DatabaseReference) {
+    private fun showAddCategoryDialog(firebaseBaza: DatabaseReference) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_dodaj_kategorie, null)
         val editTextNazwa = dialogView.findViewById<EditText>(R.id.editTextNazwaKategorii)
 

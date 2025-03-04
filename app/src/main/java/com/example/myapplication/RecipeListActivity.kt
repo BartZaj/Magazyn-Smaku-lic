@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,13 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
 import com.google.firebase.auth.FirebaseAuth
 
-class ListaPrzepisowActivity : AppCompatActivity() {
+class RecipeListActivity : AppCompatActivity() {
 
     private lateinit var przepisyRecyclerView: RecyclerView
-    private lateinit var przepisyAdapter: PrzepisyAdapter
+    private lateinit var przepisyAdapter: RecipeAdapter
     private lateinit var firebaseRef: DatabaseReference
 
-    // Lista przepisów jako lista map
     private val przepisyList = mutableListOf<Map<String, String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,38 +33,48 @@ class ListaPrzepisowActivity : AppCompatActivity() {
         firebaseRef = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy")
 
         przepisyRecyclerView = findViewById(R.id.przepisyRecyclerView)
-        przepisyAdapter = PrzepisyAdapter(przepisyList, { przepis ->
-            val intent = Intent(this, SzczegolyPrzepisuActivity::class.java)
+        przepisyAdapter = RecipeAdapter(przepisyList, { przepis ->
+            val intent = Intent(this, RecipeDetailsActivity::class.java)
             intent.putExtra("przepisId", przepis["id"])
-            startActivity(intent) }, { recipeId -> deleteRecipe(recipeId)
+            startActivity(intent) },
+            { recipeId -> deleteRecipe(recipeId)
         })
 
         val dodajPrzepisButton: Button = findViewById(R.id.dodajPrzepisButton)
         dodajPrzepisButton.setOnClickListener {
-            val intent = Intent(this, DodajPrzepisActivity::class.java)
+            val intent = Intent(this, AddRecipeActivity::class.java)
             startActivity(intent)
         }
 
         val mojMagazynButton: Button = findViewById(R.id.mojMagazynButton)
         mojMagazynButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
-            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+            finish()
+        }
 
-            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
+        val logOutButton: ImageButton = findViewById(R.id.logOutButton)
+        logOutButton.setOnClickListener {
+            val preferences = getSharedPreferences("checkbox", MODE_PRIVATE)
+            val editor = preferences.edit()
+            editor.putString("remember", "false")
+            editor.apply()
+
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LogInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
         }
 
         przepisyRecyclerView.layoutManager = LinearLayoutManager(this)
         przepisyRecyclerView.adapter = przepisyAdapter
 
-        loadPrzepisy()
+        loadRecipes()
     }
 
-    private fun loadPrzepisy() {
+    private fun loadRecipes() {
         firebaseRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 przepisyList.clear()

@@ -2,15 +2,18 @@ package com.example.myapplication
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 
 import android.net.ConnectivityManager
 import android.os.Bundle
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.myapplication.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+
 
 class LogInActivity : AppCompatActivity() {
 
@@ -35,6 +38,7 @@ class LogInActivity : AppCompatActivity() {
 
         binding.rememberMe.setOnCheckedChangeListener{ buttonView, isChecked->
             if(isChecked){
+                buttonView.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.blue))
                 val preferences = getSharedPreferences("checkbox", MODE_PRIVATE)
                 val editor = preferences.edit()
                 editor.putString("remember","true")
@@ -43,6 +47,7 @@ class LogInActivity : AppCompatActivity() {
             }
             else if(!isChecked)
             {
+                buttonView.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.grey))
                 val preferences = getSharedPreferences("checkbox", MODE_PRIVATE)
                 val editor = preferences.edit()
                 editor.putString("remember","false")
@@ -67,7 +72,9 @@ class LogInActivity : AppCompatActivity() {
                     firebaseAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val intent = Intent(this, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
+                            finish()
                         } else {
                             when (val exception = task.exception) {
                                 is FirebaseAuthInvalidUserException -> {
@@ -100,7 +107,9 @@ class LogInActivity : AppCompatActivity() {
 
                         Toast.makeText(this, "DevLogin", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
+                        finish()
                     } else {
                         // Handle login failure
                         Toast.makeText(this, "Failed to log in with developer credentials", Toast.LENGTH_SHORT).show()

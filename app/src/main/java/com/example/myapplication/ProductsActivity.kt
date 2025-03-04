@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -25,7 +26,7 @@ class ProductsActivity : AppCompatActivity() {
 
     private lateinit var categoryNameTextView: TextView
     private lateinit var produktyRecyclerView: RecyclerView
-    private lateinit var produktyAdapter: ProduktyAdapter
+    private lateinit var produktyAdapter: ProductAdapter
     private val listaProduktow = mutableListOf<Pair<String, Triple<String, String, Boolean>>>() // ID, (Nazwa, Ilość, Ostrzeżenie)
     private lateinit var firebaseBaza: DatabaseReference
     private var idKategorii: String? = null
@@ -61,12 +62,12 @@ class ProductsActivity : AppCompatActivity() {
 
         val dodajProduktButton: Button = findViewById(R.id.dodajProduktButton)
         dodajProduktButton.setOnClickListener {
-            pokazDialogDodawaniaProduktu()
+            showAddProductDialog()
         }
 
         val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
         zobaczPrzepisyButton.setOnClickListener {
-            val intent = Intent(this, ListaPrzepisowActivity::class.java)
+            val intent = Intent(this, RecipeListActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
@@ -80,9 +81,22 @@ class ProductsActivity : AppCompatActivity() {
             finish()
         }
 
-        produktyAdapter = ProduktyAdapter(listaProduktow) { idProduktu, nazwaProduktu ->
+        val logOutButton: ImageButton = findViewById(R.id.logOutButton)
+        logOutButton.setOnClickListener {
+            val preferences = getSharedPreferences("checkbox", MODE_PRIVATE)
+            val editor = preferences.edit()
+            editor.putString("remember", "false")
+            editor.apply()
+
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LogInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
+
+        produktyAdapter = ProductAdapter(listaProduktow) { idProduktu, nazwaProduktu ->
             val intent = Intent(this, ProduktDetailsActivity::class.java).apply {
-                putExtra("uid", uid)
                 putExtra("idKategorii", idKategorii)
                 putExtra("idProduktu", idProduktu)
                 putExtra("nazwaProduktu", nazwaProduktu)
@@ -167,7 +181,7 @@ class ProductsActivity : AppCompatActivity() {
         })
     }
 
-    private fun pokazDialogDodawaniaProduktu() {
+    private fun showAddProductDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_dodaj_produkt, null)
         val editTextNazwa = dialogView.findViewById<EditText>(R.id.editTextNazwaProduktu)
         val spinnerJednostka = dialogView.findViewById<Spinner>(R.id.spinnerJednostka)

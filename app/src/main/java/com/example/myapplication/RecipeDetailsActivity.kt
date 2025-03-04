@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,15 +19,15 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class SzczegolyPrzepisuActivity : AppCompatActivity() {
+class RecipeDetailsActivity : AppCompatActivity() {
 
     private lateinit var nazwaPrzepisuTextView: TextView
     private lateinit var trescPrzepisuTextView: TextView
     private lateinit var produktyRecyclerView: RecyclerView
-    private lateinit var iloscPosilkowEditText: EditText // Pole do wprowadzania ilości posiłków
+    private lateinit var iloscPosilkowEditText: EditText
 
     private lateinit var firebaseRef: DatabaseReference
-    private lateinit var produktyAdapter: ProduktyPrzepisuAdapter
+    private lateinit var produktyAdapter: RecipeProductsAdapter
 
     private val produktyList = mutableListOf<Map<String, Any>>()
     private var iloscPosilkow: Int = 1
@@ -41,12 +42,11 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
         produktyRecyclerView = findViewById(R.id.produktyRecyclerView)
         iloscPosilkowEditText = findViewById(R.id.iloscPosilkowEditText)
 
-        produktyAdapter = ProduktyPrzepisuAdapter(produktyList) { idProduktu, idKategorii ->
+        produktyAdapter = RecipeProductsAdapter(produktyList) { idProduktu, nazwa, idKategorii ->
             val intent = Intent(this, ProduktDetailsActivity::class.java).apply {
-                putExtra("uid", uid)
                 putExtra("idProduktu", idProduktu)
                 putExtra("idKategorii", idKategorii)
-                putExtra("nazwaProduktu", produktyList.find { it["id"] == idProduktu }?.get("nazwa").toString())
+                putExtra("nazwaProduktu", nazwa)
             }
             startActivity(intent)
         }
@@ -63,41 +63,45 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
         val przepisId = intent.getStringExtra("przepisId") ?: return
         firebaseRef = FirebaseDatabase.getInstance().getReference("users/$uid/przepisy/$przepisId")
 
-        loadSzczegolyPrzepisu()
+        loadRecipeDetails()
 
         iloscPosilkowEditText.addTextChangedListener { editable ->
             val iloscPosilkow = editable.toString().toIntOrNull() ?: 1
-            przeliczProdukty(iloscPosilkow)
+            countProducts(iloscPosilkow)
         }
 
         val zobaczPrzepisyButton: Button = findViewById(R.id.zobaczPrzepisyButton)
         zobaczPrzepisyButton.setOnClickListener {
-            val intent = Intent(this, ListaPrzepisowActivity::class.java)
-            startActivity(intent)
-            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
+            val intent = Intent(this, RecipeListActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
             startActivity(intent)
-
-            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
             finish()
         }
 
         val mojMagazynButton: Button = findViewById(R.id.mojMagazynButton)
         mojMagazynButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
-            // Używamy FLAG_ACTIVITY_CLEAR_TOP, aby usunąć inne aktywności w tle
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+            finish()
+        }
 
-            // Zakończenie bieżącej aktywności (aby nie wrócić do niej)
+        val logOutButton: ImageButton = findViewById(R.id.logOutButton)
+        logOutButton.setOnClickListener {
+            val preferences = getSharedPreferences("checkbox", MODE_PRIVATE)
+            val editor = preferences.edit()
+            editor.putString("remember", "false")
+            editor.apply()
+
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LogInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
         }
     }
 
-    private fun loadSzczegolyPrzepisu() {
+    private fun loadRecipeDetails() {
         firebaseRef.get().addOnSuccessListener { snapshot ->
             val nazwa = snapshot.child("nazwa").getValue(String::class.java) ?: "Nieznany"
             val tresc = snapshot.child("tresc").getValue(String::class.java) ?: "Brak treści"
@@ -107,6 +111,10 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
 
             produktyList.clear()
             val produktySnapshot = snapshot.child("produkty")
+
+            val productCount = produktySnapshot.childrenCount
+            var actualProducts = 0
+
             produktySnapshot.children.forEach { produkt ->
                 val id = produkt.key ?: return@forEach
                 val nazwaProduktu = produkt.child("name").getValue(String::class.java) ?: "Nieznany"
@@ -155,9 +163,13 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
                                 )
 
                                 produktyList.add(produktMap)
+                                actualProducts++
 
-                                produktyList.sortBy { it["nazwa"].toString() }
-                                produktyAdapter.notifyDataSetChanged()
+                                if (actualProducts == productCount.toInt())
+                                {
+                                    produktyList.sortBy { it["nazwa"].toString() }
+                                    produktyAdapter.notifyDataSetChanged()
+                                }
                             }.addOnFailureListener {
                                 Log.e("Firebase", "Błąd ładowania partii dla produktu: ${it.message}")
                             }
@@ -171,14 +183,16 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
         }
     }
 
-    private fun przeliczProdukty(iloscPosilkow: Int) {
-        produktyList.forEachIndexed { index, produkt ->
+    private fun countProducts(iloscPosilkow: Int) {
+        produktyList.forEach { produkt ->
             val iloscPrzepisBazowa = (produkt["iloscPrzepisBazowa"] as? Double) ?: 0.0
             val iloscPoZmianie = (iloscPrzepisBazowa * iloscPosilkow).let {
-                String.format("%.2f", it).replace(',', '.').toDouble()
+                String.format(Locale.US, "%.2f", it).toDouble()
             }
             val updatedProdukt = produkt.toMutableMap()
             updatedProdukt["iloscPrzepis"] = iloscPoZmianie
+
+            val index = produktyList.indexOf(produkt)
             produktyList[index] = updatedProdukt
         }
 
@@ -191,6 +205,7 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
     }
 
     private fun reaload() {
+        var actualProducts = 0
         produktyList.forEach { produkt ->
             val idKategorii = produkt["idKategorii"] as? String ?: return@forEach
             val idProduktu = produkt["id"] as? String ?: return@forEach
@@ -227,8 +242,12 @@ class SzczegolyPrzepisuActivity : AppCompatActivity() {
 
                     val index = produktyList.indexOf(produkt)
                     produktyList[index] = updatedProdukt
+                    actualProducts++
 
-                    produktyAdapter.notifyDataSetChanged()
+                    if (actualProducts == produktyList.size)
+                    {
+                        produktyAdapter.notifyDataSetChanged()
+                    }
                 }.addOnFailureListener {
                     Log.e("Firebase", "Błąd ładowania partii dla produktu: ${it.message}")
                 }

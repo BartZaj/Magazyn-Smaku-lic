@@ -5,25 +5,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PartieAdapter(
+class BatchAdapter(
     private val partieList: MutableList<Pair<String, Triple<Double, String, String>>>, // Waga jako Float
     private val onDeleteClick: (String) -> Unit,
     private val onEditClick: (String, Double) -> Unit, // Waga jako Float
     private val unit: String // Jednostka
-) : RecyclerView.Adapter<PartieAdapter.PartieViewHolder>() {
+) : RecyclerView.Adapter<BatchAdapter.PartieViewHolder>() {
 
     class PartieViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val batchWeightTextView: TextView = view.findViewById(R.id.batchWeightTextView)
         val batchExpiryDateTextView: TextView = view.findViewById(R.id.batchExpiryDateTextView)
         val batchNumberTextView: TextView = view.findViewById(R.id.batchNumberTextView)
-        val deleteButton: Button = view.findViewById(R.id.deleteBatchButton)
-        val editButton: Button = view.findViewById(R.id.editBatchButton)
+        val deleteButton: ImageButton = view.findViewById(R.id.deleteBatchButton)
+        val editButton: ImageButton = view.findViewById(R.id.editBatchButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PartieViewHolder {

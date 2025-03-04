@@ -71,6 +71,17 @@
             android:textColor="@color/blue"
             android:backgroundTint="#FFFFFF"
             app:cornerRadius="5dp"/>
+
+        <ImageButton
+            android:id="@+id/logOutButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_weight="0.25"
+            android:src="@drawable/logout_icon"
+            android:backgroundTint="@color/blue"
+            app:cornerRadius="5dp" />
     </LinearLayout>
 
 </FrameLayout>

@@ -13,14 +13,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_gravity="center_vertical"
         android:text="Nazwa przepisu"
         android:textSize="18sp"
         android:textColor="@color/blue"/>
 
-    <Button
+    <ImageButton
         android:id="@+id/usunPrzepisButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Usuń"
+        android:src="@drawable/delete_icon"
         android:backgroundTint="@color/dark_blue" />
 </LinearLayout>

@@ -8,10 +8,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
-class ProduktyPrzepisuAdapter(
+class RecipeProductsAdapter(
     private val produktyList: MutableList<Map<String, Any>>,
-    private val onItemClick: (String, String) -> Unit
-) : RecyclerView.Adapter<ProduktyPrzepisuAdapter.ViewHolder>() {
+    private val onItemClick: (String, String, String) -> Unit
+) : RecyclerView.Adapter<RecipeProductsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_produkt_przepisu, parent, false)
@@ -47,9 +47,7 @@ class ProduktyPrzepisuAdapter(
         holder.iloscOgolnaTextView.text = "Dostępna ilość: $iloscOgolna $jednostka"
 
         holder.itemView.setOnClickListener {
-            if (idProduktu.isNotEmpty() && idKategorii.isNotEmpty()) {
-                onItemClick(idProduktu, idKategorii) // Wywołanie callbacku przy kliknięciu
-            }
+                onItemClick(idProduktu,nazwa, idKategorii)
         }
     }
 
