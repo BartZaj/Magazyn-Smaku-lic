@@ -1,31 +1,89 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Przycisk dodawania kategorii -->
-    <Button
-        android:id="@+id/dodajKategorieButton"
-        android:layout_width="wrap_content"
+    <!-- Główna zawartość ekranu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginBottom="68dp">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lista Kategorii"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp"
+            android:textColor="@color/blue"/>
+
+        <!-- Przycisk dodawania kategorii -->
+        <Button
+            android:id="@+id/dodajKategorieButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Dodaj kategorię"
+            android:backgroundTint="@color/dark_blue"
+            android:layout_gravity="right"
+            android:layout_marginBottom="16dp" />
+
+        <!-- RecyclerView dla kategorii -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/kategorieRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="597dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Pasek z przyciskami na dole -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Dodaj kategorię"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp" />
+        android:background="#2196F3"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_gravity="bottom"
+    android:layout_alignParentBottom="true">
 
+    <!-- Przycisk Moj Magazyn -->
+    <Button
+        android:id="@+id/mojMagazynButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:text="Mój Magazyn"
+        android:textColor="@color/blue"
+        android:backgroundTint="#FFFFFF"
+        app:cornerRadius="5dp"/>
 
-    <!-- Przycisk wyświetlania przepisów -->
+    <!-- Przycisk Zobacz Przepisy -->
     <Button
         android:id="@+id/zobaczPrzepisyButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
         android:text="Zobacz Przepisy"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp" />
+        android:textColor="@color/blue"
+        android:backgroundTint="#FFFFFF"
+        app:cornerRadius="5dp"/>
 
-    <!-- RecyclerView dla kategorii -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/kategorieRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</LinearLayout>
+        <ImageButton
+            android:id="@+id/logOutButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:layout_weight="0.25"
+            android:src="@drawable/logout_icon"
+            android:backgroundTint="@color/blue"
+            app:cornerRadius="5dp" />
+    </LinearLayout>
+
+    </FrameLayout>

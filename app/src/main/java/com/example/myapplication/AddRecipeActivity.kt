@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,19 +11,21 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 
-data class ProduktWybrany(
+data class Product(
     val id: String,
     val name: String,
-    var ilosc: Int,
-    val id_kategorii: String
+    var ilosc: Double,
+    val id_kategorii: String,
+    val unit: String
 )
 
-class DodajPrzepisActivity : AppCompatActivity() {
+class AddRecipeActivity : AppCompatActivity() {
 
     private lateinit var nazwaPrzepisuEditText: EditText
     private lateinit var trescPrzepisuEditText: EditText
@@ -32,7 +35,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
 
     private lateinit var firebaseRef: DatabaseReference
 
-    private val wybraneProdukty = mutableListOf<ProduktWybrany>()
+    private val wybraneProdukty = mutableListOf<Product>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +52,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         loadProductsFromFirebase()
 
         dodajButton.setOnClickListener {
-            dodajPrzepisDoFirebase()
+            addRecipeToFirebase()
         }
 
         anulujButton.setOnClickListener {
@@ -64,7 +67,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         if (uid != null) {
             FirebaseDatabase.getInstance().getReference("users/$uid/kategorie")
                 .get().addOnSuccessListener { snapshot ->
-                    val allProducts = mutableListOf<Triple<String, String, String>>() // Lista do przechowywania ID, nazwy i ID kategorii
+                    val allProducts = mutableListOf<Product>()
 
                     for (categorySnapshot in snapshot.children) {
                         val idKategorii = categorySnapshot.key ?: continue
@@ -72,15 +75,17 @@ class DodajPrzepisActivity : AppCompatActivity() {
                         for (child in produktySnapshot.children) {
                             val id = child.key ?: continue
                             val nazwa = child.child("name").getValue(String::class.java) ?: "Nieznany"
-                            allProducts.add(Triple(id, nazwa, idKategorii)) // Dodajemy (ID, nazwa, ID kategorii)
+                            val unit = child.child("unit").getValue(String::class.java) ?: ""
+
+                            allProducts.add(Product(id, nazwa, 0.0, idKategorii, unit))
                         }
                     }
 
-                    allProducts.sortBy { it.second }
+                    allProducts.sortBy { it.name }
 
                     produktyLinearLayout.removeAllViews()
-                    for ((id, nazwa, idKategorii) in allProducts) {
-                        val productView = createProductView(id, nazwa, idKategorii)
+                    for (produkt in allProducts) {
+                        val productView = createProductView(produkt)
                         produktyLinearLayout.addView(productView)
                     }
                 }
@@ -89,40 +94,43 @@ class DodajPrzepisActivity : AppCompatActivity() {
         }
     }
 
-    private fun createProductView(id: String, nazwa: String, idKategorii: String): View {
+    private fun createProductView(produkt: Product): View {
         val productView = LayoutInflater.from(this).inflate(R.layout.item_produkt_do_wyboru, null)
 
         val checkBox: CheckBox = productView.findViewById(R.id.produktCheckBox)
         val nazwaTextView: TextView = productView.findViewById(R.id.nazwaProduktuTextView)
         val gramaturaEditText: EditText = productView.findViewById(R.id.gramaturaEditText)
+        val jednostkaTextView: TextView = productView.findViewById(R.id.jednostkaTextView)
 
-        nazwaTextView.text = nazwa
+        nazwaTextView.text = produkt.name
+        jednostkaTextView.text = produkt.unit // Ustawienie jednostki w widoku
 
         gramaturaEditText.isEnabled = false
 
         checkBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                checkBox.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.blue))
                 gramaturaEditText.isEnabled = true
-                val gramatura = gramaturaEditText.text.toString().toIntOrNull() ?: 0
-                if (gramatura > 0) {
-                    val produkt = ProduktWybrany(id, nazwa, gramatura, idKategorii)
-                    wybraneProdukty.add(produkt)
-                }
             } else {
+                checkBox.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.grey))
                 gramaturaEditText.isEnabled = false
                 gramaturaEditText.setText("")
-                wybraneProdukty.removeAll { it.name == nazwa }
+                wybraneProdukty.removeAll { it.id == produkt.id }
             }
         }
 
         gramaturaEditText.addTextChangedListener {
-            val gramatura = it.toString().toIntOrNull() ?: 0
+            val gramatura = it.toString().toDoubleOrNull() ?: 0.0
             if (checkBox.isChecked) {
-                val produkt = wybraneProdukty.find { it.name == nazwa }
-                if (produkt != null) {
-                    produkt.ilosc = gramatura
-                } else if (gramatura > 0) {
-                    wybraneProdukty.add(ProduktWybrany(id, nazwa, gramatura, idKategorii))
+                val produktWybrany = wybraneProdukty.find { it.id == produkt.id }
+                if (produktWybrany != null) {
+                    if (gramatura > 0.0) {
+                        produktWybrany.ilosc = gramatura
+                    } else {
+                        wybraneProdukty.removeAll { it.id == produkt.id }
+                    }
+                } else if (gramatura > 0.0) {
+                    wybraneProdukty.add(produkt.copy(ilosc = gramatura))
                 }
             }
         }
@@ -130,7 +138,7 @@ class DodajPrzepisActivity : AppCompatActivity() {
         return productView
     }
 
-    private fun dodajPrzepisDoFirebase() {
+    private fun addRecipeToFirebase() {
         val nazwaPrzepisu = nazwaPrzepisuEditText.text.toString().trim()
         val trescPrzepisu = trescPrzepisuEditText.text.toString().trim()
 
@@ -169,8 +177,6 @@ class DodajPrzepisActivity : AppCompatActivity() {
                         }
                     }
             }
-        } else {
-            Toast.makeText(this, "Błąd: użytkownik niezalogowany", Toast.LENGTH_SHORT).show()
         }
     }
 }

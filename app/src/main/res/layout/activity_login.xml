@@ -10,6 +10,19 @@
     android:gravity="center"
     tools:context=".LogInActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="serif-monospace"
+        android:paddingBottom="20dp"
+        android:text="Magazyn Smaku"
+        android:textColor="@color/blue"
+        android:textSize="44sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="60dp"
+        android:layout_marginTop="-60dp"/>
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,6 +35,7 @@
             android:layout_height="50dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+            android:backgroundTint="@color/blue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
         <LinearLayout
@@ -79,7 +93,7 @@
                 android:layout_width="312dp"
                 android:layout_height="60dp"
                 android:layout_marginTop="50dp"
-                android:backgroundTint="#74c69d"
+                android:backgroundTint="@color/dark_blue"
                 android:text="Log in!"
                 android:textColor="@color/white"
                 android:textSize="18sp"

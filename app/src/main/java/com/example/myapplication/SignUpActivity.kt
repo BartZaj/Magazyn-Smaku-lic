@@ -50,7 +50,9 @@ class SignUpActivity : AppCompatActivity() {
                             val uid = user.uid // Get the UID of the newly registered user
                             firebaseRef.child(uid).setValue("a") // Set the data under UID branch
                             val intent = Intent(this, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
+                            finish()
                         }
                     } else {
                         val exception = task.exception

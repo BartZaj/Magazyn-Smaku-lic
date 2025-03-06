@@ -31,9 +31,9 @@
             android:exported="true"
             android:theme="@style/Theme.MyApplication" />
         <activity android:name=".ProduktDetailsActivity" />
-        <activity android:name=".DodajPrzepisActivity" />
-        <activity android:name=".ListaPrzepisowActivity" />
-        <activity android:name=".SzczegolyPrzepisuActivity" />
+        <activity android:name=".AddRecipeActivity" />
+        <activity android:name=".RecipeListActivity" />
+        <activity android:name=".RecipeDetailsActivity" />
         <activity android:name=".ProductsActivity" />
     </application>
 
