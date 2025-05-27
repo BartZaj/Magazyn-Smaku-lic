@@ -180,9 +180,32 @@ class ProduktDetailsActivity : AppCompatActivity() {
                 val weight = weightInput.text.toString().toDoubleOrNull()
                 val batchNumber = batchNumberInput.text.toString()
                 val selectedDay = datePicker.dayOfMonth
-                val selectedMonth = datePicker.month + 1
+                val selectedMonth = datePicker.month
                 val selectedYear = datePicker.year
-                val selectedDate = String.format("%02d-%02d-%d", selectedDay, selectedMonth, selectedYear)
+
+                val selectedCalendar = Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, selectedDay)
+                    set(Calendar.MONTH, selectedMonth)
+                    set(Calendar.YEAR, selectedYear)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                val today = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                if (selectedCalendar.before(today)) {
+                    Toast.makeText(this, "Nie można dodać partii z przeszłą datą", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val selectedDate = String.format("%02d-%02d-%d", selectedDay, selectedMonth + 1, selectedYear)
 
                 if (weight != null && weight > 0) {
                     addNewBatch(batchNumber, weight, selectedDate)
